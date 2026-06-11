@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KiriPilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg:       #07080f;
+      --surface:  #0e1021;
+      --accent:   #4f8ef7;
+      --accent2:  #a78bfa;
+      --text:     #e8eaf6;
+      --muted:    #6b7280;
+      --glow:     rgba(79, 142, 247, 0.35);
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Starfield ── */
+    canvas#stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── HUD ring ── */
+    .hud-ring {
+      position: relative;
+      z-index: 1;
+      width: 340px;
+      height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hud-ring svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      animation: spin 18s linear infinite;
+    }
+
+    .hud-ring svg.reverse {
+      animation: spin-rev 12s linear infinite;
+    }
+
+    @keyframes spin     { to { transform: rotate(360deg); } }
+    @keyframes spin-rev { to { transform: rotate(-360deg); } }
+
+    /* ── Content card ── */
+    .card {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 2.5rem 3rem;
+    }
+
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.2rem, 6vw, 3.4rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.4rem;
+    }
+
+    .tagline {
+      font-size: 1rem;
+      color: var(--muted);
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 2.2rem;
+    }
+
+    .welcome {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.1rem, 3vw, 1.35rem);
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 2.4rem;
+      line-height: 1.5;
+    }
+
+    /* ── Button ── */
+    .btn-start {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 0.85rem 2.4rem;
+      border: none;
+      border-radius: 100px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 28px var(--glow);
+      text-decoration: none;
+    }
+
+    .btn-start:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 0 48px var(--glow);
+    }
+
+    .btn-start:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .btn-start .arrow {
+      display: inline-block;
+      transition: transform 0.2s;
+    }
+
+    .btn-start:hover .arrow {
+      transform: translateX(4px);
+    }
+
+    /* ── Nav dots ── */
+    .nav-dots {
+      margin-top: 2.8rem;
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+      opacity: 0.3;
+      transition: opacity 0.3s, background 0.3s;
+    }
+
+    .dot.active {
+      opacity: 1;
+      background: var(--accent);
+    }
+
+    /* ── Footer tag ── */
+    footer {
+      position: fixed;
+      bottom: 1.4rem;
+      z-index: 2;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 480px) {
+      .hud-ring { width: 280px; height: 280px; }
+      .card { padding: 2rem 1.5rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hud-ring svg { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="stars"></canvas>
+
+  <div class="hud-ring" aria-hidden="true">
+    <!-- Outer dashed ring -->
+    <svg viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="170" cy="170" r="160"
+        stroke="#4f8ef7" stroke-width="1"
+        stroke-dasharray="6 10"
+        stroke-opacity="0.4" />
+      <!-- tick marks -->
+      <g stroke="#4f8ef7" stroke-width="1.5" stroke-opacity="0.5">
+        <line x1="170" y1="10"  x2="170" y2="24" />
+        <line x1="170" y1="316" x2="170" y2="330" />
+        <line x1="10"  y1="170" x2="24"  y2="170" />
+        <line x1="316" y1="170" x2="330" y2="170" />
+      </g>
+    </svg>
+
+    <!-- Inner spinning arc -->
+    <svg class="reverse" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="170" cy="170" r="130"
+        stroke="url(#grad1)" stroke-width="1.5"
+        stroke-dasharray="40 220"
+        stroke-linecap="round" />
+      <defs>
+        <linearGradient id="grad1" x1="0" y1="0" x2="340" y2="340" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stop-color="#4f8ef7"/>
+          <stop offset="100%" stop-color="#a78bfa"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- Card sits in the middle via z-index -->
+    <div class="card">
+      <div class="logo">KiriPilot</div>
+      <div class="tagline">Navigate your potential</div>
+      <p class="welcome">Добро пожаловать!<br/>Готов начать?</p>
+      <a href="#" class="btn-start" onclick="handleStart(event)">
+        Start <span class="arrow">→</span>
+      </a>
+      <div class="nav-dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>KiriPilot.com &mdash; Coming Soon</footer>
+
+  <script>
+    /* ── Starfield ── */
+    const canvas = document.getElementById('stars');
+    const ctx    = canvas.getContext('2d');
+    let stars    = [];
+
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function initStars(n = 140) {
+      stars = [];
+      for (let i = 0; i < n; i++) {
+        stars.push({
+          x:    Math.random() * canvas.width,
+          y:    Math.random() * canvas.height,
+          r:    Math.random() * 1.4 + 0.3,
+          a:    Math.random(),
+          da:   (Math.random() * 0.004 + 0.001) * (Math.random() < 0.5 ? 1 : -1),
+          vx:   (Math.random() - 0.5) * 0.08,
+          vy:   (Math.random() - 0.5) * 0.08,
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const s of stars) {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(167, 139, 250, ${Math.max(0, Math.min(1, s.a))})`;
+        ctx.fill();
+
+        s.a  += s.da;
+        if (s.a > 1 || s.a < 0) s.da *= -1;
+        s.x  += s.vx;
+        s.y  += s.vy;
+        if (s.x < 0) s.x = canvas.width;
+        if (s.x > canvas.width)  s.x = 0;
+        if (s.y < 0) s.y = canvas.height;
+        if (s.y > canvas.height) s.y = 0;
+      }
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', () => { resize(); initStars(); });
+    resize();
+    initStars();
+    drawStars();
+
+    /* ── Start button ── */
+    function handleStart(e) {
+      e.preventDefault();
+      // Replace this with your real navigation later
+      alert('Запуск скоро! 🚀');
+    }
+  </script>
+</body>
+</html>
