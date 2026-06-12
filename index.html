@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KiriPilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #07080f;
+      --surface:  #0e1021;
+      --surface2: #131629;
+      --accent:   #4f8ef7;
+      --accent2:  #a78bfa;
+      --text:     #e8eaf6;
+      --muted:    #6b7280;
+      --border:   rgba(79,142,247,0.18);
+      --glow:     rgba(79,142,247,0.35);
+      --nav-max:  1100px;
+    }
+    html, body { height: 100%; scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+    canvas#stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(7,8,15,0.75); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { max-width: var(--nav-max); margin: 0 auto; padding: 1rem 2.5rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; flex-shrink: 0; }
+    .nav-links { display: flex; gap: 0.3rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.88rem; font-weight: 500; letter-spacing: 0.03em; padding: 0.45rem 1rem; border-radius: 100px; transition: color 0.2s, background 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); background: rgba(79,142,247,0.12); }
+    .nav-cta { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff !important; font-weight: 600 !important; padding: 0.45rem 1.2rem !important; }
+    .nav-cta:hover { opacity: 0.88; }
+    .burger { display: none; flex-direction: column; justify-content: center; gap: 5px; width: 36px; height: 36px; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 8px; transition: background 0.2s; flex-shrink: 0; }
+    .burger:hover { background: rgba(79,142,247,0.1); }
+    .burger span { display: block; height: 2px; background: var(--text); border-radius: 2px; transition: transform 0.3s, opacity 0.3s; }
+    .burger span:nth-child(1) { width: 22px; }
+    .burger span:nth-child(2) { width: 16px; }
+    .burger span:nth-child(3) { width: 22px; }
+    nav.menu-open .burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); width: 22px; }
+    nav.menu-open .burger span:nth-child(2) { opacity: 0; }
+    nav.menu-open .burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); width: 22px; }
+    .mobile-menu { display: none; flex-direction: column; padding: 0 1.4rem 1.4rem; gap: 0.3rem; border-top: 1px solid var(--border); max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.22,1,0.36,1), padding 0.3s; }
+    nav.menu-open .mobile-menu { max-height: 400px; padding: 1rem 1.4rem 1.4rem; }
+    .mobile-menu a { display: block; color: var(--muted); text-decoration: none; font-size: 1rem; font-weight: 500; padding: 0.75rem 1rem; border-radius: 12px; transition: color 0.2s, background 0.2s; }
+    .mobile-menu a:hover { color: var(--text); background: rgba(79,142,247,0.1); }
+    .mobile-menu .mob-cta { margin-top: 0.4rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff !important; text-align: center; font-weight: 600; }
+
+    /* ── SECTIONS ── */
+    .page-wrap { position: relative; z-index: 1; display: flex; flex-direction: column; }
+    section { min-height: 100vh; padding: 7rem 2rem 5rem; display: flex; flex-direction: column; align-items: center; }
+    .section-inner { width: 100%; max-width: 1000px; }
+    .section-eyebrow { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.7rem; }
+    .section-title { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.6rem,4vw,2.6rem); font-weight: 700; line-height: 1.2; margin-bottom: 1rem; letter-spacing: -0.02em; }
+    .section-subtitle { font-size: 1.05rem; color: #8e93b0; line-height: 1.7; max-width: 580px; margin-bottom: 3.5rem; }
+    .divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+
+    /* HERO */
+    #hero { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 5rem; }
+    .hud-ring { position: relative; width: 340px; height: 340px; display: flex; align-items: center; justify-content: center; }
+    .hud-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; animation: spin 18s linear infinite; }
+    .hud-ring svg.reverse { animation: spin-rev 12s linear infinite; }
+    @keyframes spin     { to { transform: rotate(360deg); } }
+    @keyframes spin-rev { to { transform: rotate(-360deg); } }
+    .card { position: relative; z-index: 2; text-align: center; padding: 2.5rem 3rem; }
+    .logo { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.2rem,6vw,3.4rem); font-weight: 700; letter-spacing: -0.03em; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.4rem; }
+    .tagline { font-size: 1rem; color: var(--muted); font-weight: 300; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2.2rem; }
+    .welcome { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.1rem,3vw,1.35rem); font-weight: 400; color: var(--text); margin-bottom: 2.4rem; line-height: 1.5; }
+    .btn-start { display: inline-flex; align-items: center; gap: 0.55rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 600; letter-spacing: 0.04em; padding: 0.85rem 2.4rem; border: none; border-radius: 100px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 0 28px var(--glow); text-decoration: none; }
+    .btn-start:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 0 48px var(--glow); }
+    .btn-start:active { transform: translateY(0) scale(0.98); }
+    .btn-start .arrow { display: inline-block; transition: transform 0.2s; }
+    .btn-start:hover .arrow { transform: translateX(4px); }
+    .nav-dots { margin-top: 2.8rem; display: flex; gap: 0.5rem; justify-content: center; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); opacity: 0.3; transition: opacity 0.3s, background 0.3s; }
+    .dot.active { opacity: 1; background: var(--accent); }
+
+    /* ABOUT */
+    .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,260px),1fr)); gap: 1.2rem; margin-top: 0.5rem; }
+    .about-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 1.8rem; transition: border-color 0.3s, transform 0.3s; }
+    .about-card:hover { border-color: rgba(79,142,247,0.4); transform: translateY(-4px); }
+    .about-card .icon { font-size: 1.8rem; margin-bottom: 1rem; display: block; }
+    .about-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .about-card p { font-size: 0.9rem; color: #8e93b0; line-height: 1.65; }
+
+    /* PRICING */
+    #pricing { background: linear-gradient(180deg, var(--bg) 0%, var(--surface) 50%, var(--bg) 100%); }
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,280px),1fr)); gap: 1.5rem; width: 100%; max-width: 680px; }
+    .plan { background: var(--surface2); border: 1px solid var(--border); border-radius: 22px; padding: 2.2rem; position: relative; transition: border-color 0.3s, transform 0.3s; display: flex; flex-direction: column; }
+    .plan:hover { transform: translateY(-5px); border-color: rgba(79,142,247,0.35); }
+    .plan.featured { border-color: rgba(79,142,247,0.5); background: linear-gradient(160deg, #0f1529, #111630); box-shadow: 0 0 60px rgba(79,142,247,0.12); }
+    .plan-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.3rem 1rem; border-radius: 100px; white-space: nowrap; }
+    .plan-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .plan-desc { font-size: 0.88rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.5; }
+    .plan-price { margin-bottom: 1.8rem; display: flex; align-items: baseline; gap: 0.3rem; }
+    .plan-price .amount { font-family: 'Space Grotesk', sans-serif; font-size: 2.6rem; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .plan-price .period { font-size: 0.88rem; color: var(--muted); }
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 2rem; flex: 1; }
+    .plan-features li { display: flex; align-items: center; gap: 0.65rem; font-size: 0.9rem; color: #c4c9e8; }
+    .plan-features li .check { color: var(--accent); flex-shrink: 0; }
+    .plan .btn-plan { display: block; text-align: center; padding: 0.8rem; border-radius: 12px; font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s, transform 0.2s; text-decoration: none; }
+    .plan .btn-plan:hover { opacity: 0.88; transform: translateY(-1px); }
+    .plan.featured .btn-plan { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 0 24px var(--glow); }
+    .plan:not(.featured) .btn-plan { background: rgba(79,142,247,0.1); color: var(--accent); border: 1px solid rgba(79,142,247,0.25); }
+    .pricing-note { margin-top: 1.8rem; font-size: 0.83rem; color: var(--muted); text-align: center; max-width: 680px; line-height: 1.6; }
+
+    /* SUPPORT */
+    .support-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,280px),1fr)); gap: 1.2rem; }
+    .support-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 1.8rem 2rem; display: flex; flex-direction: column; gap: 0.7rem; transition: border-color 0.3s, transform 0.3s; }
+    .support-card:hover { border-color: rgba(79,142,247,0.38); transform: translateY(-3px); }
+    .support-card .s-icon { font-size: 1.7rem; }
+    .support-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; }
+    .support-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; flex: 1; }
+    .support-card a, .support-card .s-link { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.88rem; font-weight: 600; color: var(--accent); text-decoration: none; cursor: pointer; transition: gap 0.2s; background: none; border: none; padding: 0; font-family: 'Inter', sans-serif; }
+    .support-card a:hover, .support-card .s-link:hover { gap: 0.55rem; }
+
+    /* FAQ */
+    .faq-list { display: flex; flex-direction: column; gap: 0.8rem; max-width: 700px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .faq-q { width: 100%; background: none; border: none; text-align: left; padding: 1.2rem 1.5rem; font-family: 'Space Grotesk', sans-serif; font-size: 0.97rem; font-weight: 600; color: var(--text); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    .faq-q .chevron { font-size: 0.9rem; color: var(--accent); transition: transform 0.3s; flex-shrink: 0; }
+    .faq-item.open .chevron { transform: rotate(180deg); }
+    .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s; font-size: 0.92rem; color: #8e93b0; line-height: 1.7; }
+    .faq-item.open .faq-a { max-height: 300px; padding: 0 1.5rem 1.2rem; }
+
+    /* CONTACT */
+    .contact-card { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 2.5rem; max-width: 560px; width: 100%; box-shadow: 0 0 60px rgba(79,142,247,0.07); }
+    .form-row { display: flex; flex-direction: column; gap: 0.55rem; margin-bottom: 1.2rem; }
+    .form-row label { font-size: 0.82rem; font-weight: 500; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+    .form-row input, .form-row textarea, .form-row select { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 0.8rem 1rem; color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.2s; resize: none; width: 100%; }
+    .form-row input:focus, .form-row textarea:focus, .form-row select:focus { border-color: rgba(79,142,247,0.55); }
+    .form-row textarea { min-height: 110px; }
+    .form-row select option { background: var(--surface2); }
+    .form-send { display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 0.98rem; font-weight: 600; padding: 0.8rem 2.2rem; border: none; border-radius: 100px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 0 24px var(--glow); }
+    .form-send:hover { transform: translateY(-2px); box-shadow: 0 0 40px var(--glow); }
+    .form-success { display: none; text-align: center; padding: 1.5rem 0; font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; color: var(--accent); }
+
+    /* FOOTER */
+    .main-footer { position: relative; z-index: 1; background: var(--surface); border-top: 1px solid var(--border); padding: 3rem 2rem; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; text-align: center; }
+    .footer-logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+    .footer-links a { color: var(--muted); font-size: 0.85rem; text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.06em; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface); border: 1px solid rgba(79,142,247,0.35); border-radius: 100px; padding: 0.8rem 1.8rem; font-size: 0.9rem; color: var(--text); z-index: 500; opacity: 0; transition: opacity 0.3s, transform 0.3s; box-shadow: 0 0 30px rgba(79,142,247,0.15); pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ══ WIDGET ══ */
+    #kiri-chat-btn { position: fixed; bottom: 28px; right: 28px; z-index: 9998; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 0 rgba(79,142,247,0.5); transition: transform 0.25s, box-shadow 0.25s; animation: pulse-ring 3s ease-out infinite; }
+    #kiri-chat-btn:hover { transform: scale(1.1); box-shadow: 0 0 32px rgba(79,142,247,0.5); }
+    #kiri-chat-btn svg { width: 26px; height: 26px; fill: #fff; }
+    @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(79,142,247,0.5); } 70% { box-shadow: 0 0 0 14px rgba(79,142,247,0); } 100% { box-shadow: 0 0 0 0 rgba(79,142,247,0); } }
+    #kiri-badge { position: absolute; top: -4px; right: -4px; background: #f87171; color: #fff; font-size: 11px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg); opacity: 0; transform: scale(0); transition: opacity 0.2s, transform 0.2s; }
+    #kiri-badge.visible { opacity: 1; transform: scale(1); }
+    #kiri-widget { position: fixed; bottom: 100px; right: 28px; z-index: 9999; width: 380px; max-height: 580px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 48px rgba(0,0,0,0.7), 0 0 60px rgba(79,142,247,0.08); backdrop-filter: blur(20px); opacity: 0; transform: translateY(20px) scale(0.96); pointer-events: none; transition: opacity 0.3s cubic-bezier(0.16,1,0.3,1), transform 0.3s cubic-bezier(0.16,1,0.3,1); }
+    #kiri-widget.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+    .kw-header { padding: 16px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; background: rgba(79,142,247,0.04); }
+    .kw-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 16px rgba(79,142,247,0.4); }
+    .kw-avatar svg { width: 18px; height: 18px; fill: #fff; }
+    .kw-header-info { flex: 1; }
+    .kw-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; }
+    .kw-status { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+    .kw-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+    .kw-close { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; border-radius: 6px; display: flex; align-items: center; transition: color 0.2s, background 0.2s; }
+    .kw-close:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .kw-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
+    .kw-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+    #kw-auth-screen { padding: 28px 24px; display: flex; flex-direction: column; gap: 16px; }
+    .kw-auth-icon { text-align: center; margin-bottom: 4px; }
+    .kw-auth-icon svg { width: 44px; height: 44px; stroke: var(--accent); fill: none; filter: drop-shadow(0 0 12px var(--accent)); }
+    .kw-auth-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; text-align: center; }
+    .kw-auth-desc { font-size: 13px; color: var(--muted); text-align: center; line-height: 1.6; }
+    .kw-input-wrap { position: relative; }
+    .kw-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 14px; color: var(--text); font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .kw-input::placeholder { color: var(--muted); }
+    .kw-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,142,247,0.12); }
+    .kw-input-back { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 6px; border-radius: 4px; transition: color 0.2s; }
+    .kw-input-back:hover { color: var(--accent); }
+    .kw-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.04em; border: none; border-radius: 10px; cursor: pointer; transition: opacity 0.2s, transform 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .kw-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .kw-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .kw-error { font-size: 12px; color: #f87171; text-align: center; min-height: 18px; }
+    .kw-hint { font-size: 11px; color: var(--muted); text-align: center; }
+    .kw-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: kspin 0.6s linear infinite; display: none; }
+    @keyframes kspin { to { transform: rotate(360deg); } }
+    #kw-chat-screen { display: none; flex-direction: column; flex: 1; min-height: 0; }
+    .kw-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; scrollbar-color: rgba(79,142,247,0.2) transparent; }
+    .kw-messages::-webkit-scrollbar { width: 4px; }
+    .kw-messages::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.2); border-radius: 2px; }
+    .kw-msg { display: flex; flex-direction: column; max-width: 82%; }
+    .kw-msg.user { align-self: flex-end; align-items: flex-end; }
+    .kw-msg.admin { align-self: flex-start; align-items: flex-start; }
+    .kw-msg-sender { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+    .kw-msg-sender .bot-icon { width: 14px; height: 14px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+    .kw-msg-sender .bot-icon svg { width: 8px; height: 8px; fill: #fff; }
+    .kw-msg-bubble { padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.55; word-break: break-word; }
+    .kw-msg.user .kw-msg-bubble { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-bottom-right-radius: 4px; }
+    .kw-msg.admin .kw-msg-bubble { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+    .kw-msg-time { font-size: 10px; color: var(--muted); margin-top: 3px; }
+    .kw-input-area { padding: 12px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
+    .kw-textarea { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--text); font-family: 'Inter', sans-serif; outline: none; resize: none; min-height: 40px; max-height: 100px; line-height: 1.5; transition: border-color 0.2s; }
+    .kw-textarea::placeholder { color: var(--muted); }
+    .kw-textarea:focus { border-color: var(--accent); }
+    .kw-send-btn { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.2s, transform 0.15s; box-shadow: 0 0 12px rgba(79,142,247,0.35); }
+    .kw-send-btn:hover { opacity: 0.9; transform: scale(1.05); }
+    .kw-send-btn svg { width: 16px; height: 16px; fill: #fff; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .hud-ring { width: 280px; height: 280px; }
+      .card { padding: 1.8rem 1.2rem; }
+      .nav-inner { padding: 0.85rem 1.2rem; }
+      .nav-links { display: none; }
+      .burger { display: flex; }
+      .mobile-menu { display: flex; }
+      section { padding: 5.5rem 1rem 3.5rem; min-height: auto; }
+      .section-title { font-size: clamp(1.4rem,6vw,1.9rem); }
+      .section-subtitle { font-size: 0.92rem; margin-bottom: 2.2rem; }
+      .about-card { padding: 1.3rem; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 100%; }
+      .support-grid { grid-template-columns: 1fr; }
+      .contact-card { padding: 1.6rem 1.2rem; }
+      .footer-links { gap: 1rem; }
+      #kiri-widget { width: calc(100vw - 24px); right: 12px; bottom: 90px; }
+      #kiri-chat-btn { bottom: 16px; right: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .hud-ring svg { animation: none; } }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<!-- NAV -->
+<nav id="nav" aria-label="Навигация">
+  <div class="nav-inner">
+    <div class="nav-logo">KiriPilot</div>
+    <ul class="nav-links">
+      <li><a href="#about"   data-section="about">О продукте</a></li>
+      <li><a href="#pricing" data-section="pricing">Подписка</a></li>
+      <li><a href="#support" data-section="support">Поддержка</a></li>
+      <li><a href="#contact" data-section="contact" class="nav-cta">Связаться</a></li>
+    </ul>
+    <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" onclick="toggleMobileMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+    <a href="#about"   onclick="mobileNavClick('about')">О продукте</a>
+    <a href="#pricing" onclick="mobileNavClick('pricing')">Подписка</a>
+    <a href="#support" onclick="mobileNavClick('support')">Поддержка</a>
+    <a href="#contact" onclick="mobileNavClick('contact')" class="mob-cta">Связаться</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hud-ring">
+      <svg viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="170" cy="170" r="155" stroke="url(#g0)" stroke-width="1" stroke-dasharray="8 18" stroke-linecap="round"/>
+        <circle cx="170" cy="170" r="120" stroke="url(#g0)" stroke-width="1.5" stroke-dasharray="60 30" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="g0" x1="0" y1="0" x2="340" y2="340" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#4f8ef7"/>
+            <stop offset="100%" stop-color="#a78bfa"/>
+          </linearGradient>
+        </defs>
+        <g stroke="#4f8ef7" stroke-width="1.5" stroke-opacity="0.5">
+          <line x1="170" y1="10"  x2="170" y2="24" />
+          <line x1="170" y1="316" x2="170" y2="330" />
+          <line x1="10"  y1="170" x2="24"  y2="170" />
+          <line x1="316" y1="170" x2="330" y2="170" />
+        </g>
+      </svg>
+      <svg class="reverse" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="170" cy="170" r="130" stroke="url(#g1)" stroke-width="1.5" stroke-dasharray="40 220" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="340" y2="340" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#4f8ef7"/>
+            <stop offset="100%" stop-color="#a78bfa"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="card">
+        <div class="logo">KiriPilot</div>
+        <div class="tagline">Navigate your potential</div>
+        <p class="welcome">Облачный ИИ-ассистент,<br/>который работает за тебя</p>
+        <a href="#about" class="btn-start" onclick="event.preventDefault();scrollToSection('about')">
+          Узнать больше <span class="arrow">→</span>
+        </a>
+        <div class="nav-dots">
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-inner">
+      <div class="section-eyebrow">О продукте</div>
+      <h2 class="section-title">ИИ, который работает<br/>за тебя — с максимальным удобством</h2>
+      <p class="section-subtitle">KiriPilot — это не просто чат-бот. Это полноценный агент, который видит твой экран, понимает контекст и выполняет задачи так, как ты бы сделал это сам. Все вычисления — в облаке, весь комфорт — тебе.</p>
+      <div class="about-grid">
+        <div class="about-card"><span class="icon">☁️</span><h3>Облачная мощь</h3><p>Вся обработка происходит на наших серверах. Твой ПК не нагружается — агент работает быстро и плавно на любом железе.</p></div>
+        <div class="about-card"><span class="icon">🧠</span><h3>Умное управление</h3><p>Открывает файлы, переключает задачи, вводит текст и кликает по нужным элементам — всё по твоей команде.</p></div>
+        <div class="about-card"><span class="icon">📅</span><h3>Планирование дня</h3><p>Составляет расписание, напоминает о дедлайнах и синхронизирует задачи с твоими приложениями.</p></div>
+        <div class="about-card"><span class="icon">🛍️</span><h3>Помощник по покупкам</h3><p>Ищет лучшие предложения, сравнивает товары и помогает оформить заказ в несколько слов.</p></div>
+        <div class="about-card"><span class="icon">⚡</span><h3>Автоматизация рутины</h3><p>Берёт на себя повторяющиеся задачи: сортировку файлов, отправку писем, заполнение форм.</p></div>
+        <div class="about-card"><span class="icon">🌐</span><h3>Работа с браузером</h3><p>Ищет информацию, заполняет формы, читает страницы и пересказывает главное.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div class="section-inner" style="display:flex;flex-direction:column;align-items:center;">
+      <div class="section-eyebrow">Подписка</div>
+      <h2 class="section-title" style="text-align:center;">Выбери свой тариф</h2>
+      <p class="section-subtitle" style="text-align:center;">Два плана — никаких скрытых комиссий. Выбери нужный и начни уже сегодня.</p>
+      <div class="pricing-grid">
+        <div class="plan">
+          <div class="plan-name">PRO</div>
+          <div class="plan-desc">Всё необходимое для повседневной работы и автоматизации задач.</div>
+          <div class="plan-price"><span class="amount">1 500 ₽</span><span class="period">/ месяц</span></div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span>Управление рабочим столом</li>
+            <li><span class="check">✓</span>Планировщик задач и дня</li>
+            <li><span class="check">✓</span>Помощник по покупкам</li>
+            <li><span class="check">✓</span>Работа с браузером</li>
+            <li><span class="check">✓</span>Поддержка в чате</li>
+          </ul>
+          <button class="btn-plan" onclick="showToast('Оформление подписки откроется скоро! 🚀')">Подключить PRO</button>
+        </div>
+        <div class="plan featured">
+          <div class="plan-badge">✦ Максимум</div>
+          <div class="plan-name">MAX</div>
+          <div class="plan-desc">Максимальная скорость, приоритет и полный набор возможностей.</div>
+          <div class="plan-price"><span class="amount">2 500 ₽</span><span class="period">/ месяц</span></div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span>Всё из плана PRO</li>
+            <li><span class="check">✓</span>Приоритетная поддержка 24/7</li>
+            <li><span class="check">✓</span>Ранний доступ к новым функциям</li>
+            <li><span class="check">✓</span>Расширенная автоматизация</li>
+            <li><span class="check">✓</span>API-доступ</li>
+          </ul>
+          <button class="btn-plan" onclick="showToast('Оформление подписки откроется скоро! ✦')">Подключить MAX</button>
+        </div>
+      </div>
+      <p class="pricing-note">Оплата ежемесячно. Отмена в любой момент из личного кабинета.</p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- SUPPORT -->
+  <section id="support">
+    <div class="section-inner">
+      <div class="section-eyebrow">Поддержка</div>
+      <h2 class="section-title">Мы всегда на связи</h2>
+      <p class="section-subtitle">Возникли вопросы? Выбери удобный канал — мы ответим быстро.</p>
+      <div class="support-grid">
+        <div class="support-card"><span class="s-icon">💬</span><h3>Чат поддержки</h3><p>Ответим в течение нескольких минут в рабочее время. Для плана MAX — приоритетная очередь 24/7.</p><button class="s-link" onclick="openWidget()">Написать в чат →</button></div>
+        <div class="support-card"><span class="s-icon">✉️</span><h3>Email</h3><p>Для сложных вопросов и технических проблем. Отвечаем в течение 24 часов в будни.</p><a href="mailto:support@kiripilot.com">support@kiripilot.com →</a></div>
+        <div class="support-card"><span class="s-icon">📖</span><h3>База знаний</h3><p>Гайды, видеоуроки и ответы на частые вопросы. Большинство проблем решается за 2 минуты.</p><button class="s-link" onclick="showToast('Документация в разработке 📖')">Открыть документацию →</button></div>
+        <div class="support-card"><span class="s-icon">🐛</span><h3>Сообщить об ошибке</h3><p>Нашёл баг или что-то работает не так? Расскажи нам — мы фиксируем все обращения.</p><button class="s-link" onclick="scrollToSection('contact')">Отправить отчёт →</button></div>
+      </div>
+      <div style="margin-top:3.5rem;">
+        <div class="section-eyebrow" style="margin-bottom:1rem;">Частые вопросы</div>
+        <div class="faq-list">
+          <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Как KiriPilot управляет моим ПК? <span class="chevron">▾</span></button><div class="faq-a">KiriPilot устанавливает лёгкий клиент на твой компьютер. Вся «умная» часть работает в облаке на наших серверах — клиент лишь транслирует экран и выполняет команды. Ресурсы твоего ПК почти не задействуются.</div></div>
+          <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Мои данные в безопасности? <span class="chevron">▾</span></button><div class="faq-a">Да. Передача данных защищена шифрованием. Мы не храним скриншоты и не передаём личные данные третьим лицам.</div></div>
+          <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">На каких ОС работает KiriPilot? <span class="chevron">▾</span></button><div class="faq-a">Первый релиз выйдет для Windows 10/11. Поддержка macOS и Linux запланирована в следующих обновлениях.</div></div>
+          <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Можно ли отменить подписку? <span class="chevron">▾</span></button><div class="faq-a">Конечно. Подписку можно отменить в любой момент в настройках аккаунта. Доступ сохраняется до конца оплаченного срока.</div></div>
+          <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">В чём разница между PRO и MAX? <span class="chevron">▾</span></button><div class="faq-a">PRO покрывает все базовые и продвинутые сценарии. MAX добавляет приоритетную поддержку 24/7, ранний доступ к новым функциям и API-доступ.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-inner" style="align-items:center;display:flex;flex-direction:column;">
+      <div class="section-eyebrow">Связаться</div>
+      <h2 class="section-title" style="text-align:center;">Есть вопрос или предложение?</h2>
+      <p class="section-subtitle" style="text-align:center;">Оставь сообщение — мы вернёмся в течение рабочего дня.</p>
+      <div class="contact-card">
+        <div class="form-row"><label for="cf-name">Имя</label><input id="cf-name" type="text" placeholder="Как тебя зовут?" /></div>
+        <div class="form-row"><label for="cf-email">Email</label><input id="cf-email" type="email" placeholder="your@email.com" /></div>
+        <div class="form-row"><label for="cf-topic">Тема</label>
+          <select id="cf-topic"><option value="">Выбери тему...</option><option>Общий вопрос</option><option>Подписка и оплата</option><option>Техническая проблема</option><option>Партнёрство</option><option>Отзыв или предложение</option></select>
+        </div>
+        <div class="form-row"><label for="cf-msg">Сообщение</label><textarea id="cf-msg" placeholder="Расскажи подробнее..."></textarea></div>
+        <button class="form-send" onclick="submitForm()">Отправить ✦</button>
+        <div class="form-success" id="form-success">✅ Сообщение отправлено! Ответим скоро.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="main-footer">
+    <div class="footer-logo">KiriPilot</div>
+    <nav class="footer-links">
+      <a href="#about" onclick="scrollToSection('about')">О продукте</a>
+      <a href="#pricing" onclick="scrollToSection('pricing')">Подписка</a>
+      <a href="#support" onclick="scrollToSection('support')">Поддержка</a>
+      <a href="#contact" onclick="scrollToSection('contact')">Контакты</a>
+      <a href="mailto:support@kiripilot.com">Email</a>
+    </nav>
+    <div class="footer-copy">© 2025 KiriPilot — Все права защищены · Coming Soon</div>
+  </footer>
+
+</div><!-- /page-wrap -->
+
+<!-- TOAST -->
+<div class="toast" id="toast" aria-live="polite"></div>
+
+<!-- ══ CHAT WIDGET ══ -->
+<button id="kiri-chat-btn" aria-label="Открыть чат поддержки">
+  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+  <span id="kiri-badge"></span>
+</button>
+
+<div id="kiri-widget" role="dialog" aria-label="Чат поддержки KiriPilot">
+  <div class="kw-header">
+    <div class="kw-avatar"><svg viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3V3h-2v2H9V3H7v2H4c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9h-2zm0 11H4V7h16v13zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg></div>
+    <div class="kw-header-info">
+      <div class="kw-title">Поддержка KiriPilot</div>
+      <div class="kw-status"><span class="kw-status-dot"></span>Онлайн — обычно отвечаем за 5 мин</div>
+    </div>
+    <button class="kw-close" id="kiri-close-btn" aria-label="Закрыть"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="kw-content">
+    <div id="kw-auth-screen">
+      <div id="kw-step-email">
+        <div class="kw-auth-icon"><svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></div>
+        <div class="kw-auth-title">Начать чат</div>
+        <div class="kw-auth-desc">Введите ваш email — отправим код для входа</div>
+        <div class="kw-input-wrap"><input id="kw-email-input" class="kw-input" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email"/></div>
+        <button id="kw-send-otp-btn" class="kw-btn"><span class="kw-spinner" id="kw-email-spinner"></span><span id="kw-send-otp-label">Получить код →</span></button>
+        <div class="kw-error" id="kw-email-error"></div>
+        <div class="kw-hint">Мы не передаём ваш email третьим лицам</div>
+      </div>
+      <div id="kw-step-otp" style="display:none;">
+        <div class="kw-auth-icon"><svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div class="kw-auth-title">Введите код</div>
+        <div class="kw-auth-desc" id="kw-otp-desc">Отправили 6-значный код на ваш email</div>
+        <div class="kw-input-wrap"><input id="kw-otp-input" class="kw-input" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code" style="letter-spacing:0.3em;font-size:20px;text-align:center;padding-right:60px;"/><button class="kw-input-back" id="kw-back-btn">Назад</button></div>
+        <button id="kw-verify-btn" class="kw-btn"><span class="kw-spinner" id="kw-otp-spinner"></span><span id="kw-verify-label">Подтвердить</span></button>
+        <div class="kw-error" id="kw-otp-error"></div>
+        <div class="kw-hint">Не пришло? <button class="kw-input-back" id="kw-resend-btn" style="position:static;padding:0;font-size:11px;color:var(--accent);">Отправить повторно</button></div>
+      </div>
+    </div>
+    <div id="kw-chat-screen">
+      <div class="kw-messages" id="kw-messages">
+        <div class="kw-msg admin">
+          <div class="kw-msg-sender"><span class="bot-icon"><svg viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3V3h-2v2H9V3H7v2H4c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9h-2z"/></svg></span>Поддержка KiriPilot</div>
+          <div class="kw-msg-bubble">👋 Привет! Мы рады вам помочь. Опишите ваш вопрос, и мы ответим как можно скорее.</div>
+          <div class="kw-msg-time" id="kw-welcome-time"></div>
+        </div>
+      </div>
+      <div class="kw-input-area">
+        <textarea id="kw-message-input" class="kw-textarea" placeholder="Напишите сообщение..." rows="1"></textarea>
+        <button id="kw-msg-send-btn" class="kw-send-btn" aria-label="Отправить"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Замените URL на адрес вашего бэкенда на Railway/Render -->
+<script src="https://ВАШ-ДОМЕН.railway.app/socket.io/socket.io.js"></script>
+
+<script>
+'use strict';
+
+/* ── Starfield ── */
+const canvas = document.getElementById('stars');
+const ctx    = canvas.getContext('2d');
+let stars    = [];
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+function initStars(n=160) {
+  stars = [];
+  for (let i=0;i<n;i++) stars.push({ x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*1.4+0.3, a:Math.random(), da:(Math.random()*0.004+0.001)*(Math.random()<0.5?1:-1), vx:(Math.random()-0.5)*0.07, vy:(Math.random()-0.5)*0.07 });
+}
+function drawStars() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for (const s of stars) {
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(167,139,250,${Math.max(0,Math.min(1,s.a))})`; ctx.fill();
+    s.a+=s.da; if(s.a>1||s.a<0)s.da*=-1;
+    s.x+=s.vx; s.y+=s.vy;
+    if(s.x<0)s.x=canvas.width; if(s.x>canvas.width)s.x=0;
+    if(s.y<0)s.y=canvas.height; if(s.y>canvas.height)s.y=0;
+  }
+  requestAnimationFrame(drawStars);
+}
+window.addEventListener('resize', ()=>{ resizeCanvas(); initStars(); });
+resizeCanvas(); initStars(); drawStars();
+
+/* ── Nav ── */
+function toggleMobileMenu() {
+  const nav=document.getElementById('nav'), burger=document.getElementById('burger'), menu=document.getElementById('mobile-menu');
+  const isOpen=nav.classList.toggle('menu-open');
+  burger.setAttribute('aria-expanded',isOpen); menu.setAttribute('aria-hidden',!isOpen);
+}
+function mobileNavClick(id) {
+  const nav=document.getElementById('nav'), burger=document.getElementById('burger'), menu=document.getElementById('mobile-menu');
+  nav.classList.remove('menu-open'); burger.setAttribute('aria-expanded','false'); menu.setAttribute('aria-hidden','true');
+  setTimeout(()=>scrollToSection(id),250);
+}
+function scrollToSection(id) { const el=document.getElementById(id); if(el)el.scrollIntoView({behavior:'smooth'}); }
+
+/* ── Nav highlight ── */
+(function setupNavHighlight() {
+  const sections=['about','pricing','support','contact'];
+  const links=document.querySelectorAll('.nav-links [data-section]');
+  const obs=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting)links.forEach(l=>l.classList.toggle('active',l.dataset.section===e.target.id)); });
+  },{rootMargin:'-40% 0px -55% 0px'});
+  sections.forEach(id=>{ const el=document.getElementById(id); if(el)obs.observe(el); });
+})();
+
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const nav=document.getElementById('nav'); if(nav.classList.contains('menu-open'))toggleMobileMenu(); } });
+
+/* ── FAQ ── */
+function toggleFaq(btn) {
+  const item=btn.parentElement, isOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+  if(!isOpen)item.classList.add('open');
+}
+
+/* ── Toast ── */
+let toastTimer;
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+/* ── Contact form ── */
+function submitForm() {
+  const name=document.getElementById('cf-name').value.trim(), email=document.getElementById('cf-email').value.trim(), topic=document.getElementById('cf-topic').value, msg=document.getElementById('cf-msg').value.trim();
+  if(!name||!email||!topic||!msg){showToast('Пожалуйста, заполни все поля 📝');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showToast('Проверь адрес электронной почты');return;}
+  document.querySelector('.form-send').style.display='none';
+  document.getElementById('form-success').style.display='block';
+  showToast('Сообщение отправлено! ✅');
+}
+
+/* ══════════════════════════════════════
+   WIDGET LOGIC
+══════════════════════════════════════ */
+const BACKEND_URL = 'https://ВАШ-ДОМЕН.railway.app'; // ← поменяйте!
+
+const wState = { isOpen:false, email:localStorage.getItem('kiri_email')||null, sessionId:localStorage.getItem('kiri_session')||null, unread:0 };
+
+const chatBtn     = document.getElementById('kiri-chat-btn');
+const badge       = document.getElementById('kiri-badge');
+const widget      = document.getElementById('kiri-widget');
+const closeBtn    = document.getElementById('kiri-close-btn');
+const authScreen  = document.getElementById('kw-auth-screen');
+const chatScreen  = document.getElementById('kw-chat-screen');
+const stepEmail   = document.getElementById('kw-step-email');
+const stepOtp     = document.getElementById('kw-step-otp');
+const emailInput  = document.getElementById('kw-email-input');
+const sendOtpBtn  = document.getElementById('kw-send-otp-btn');
+const emailSpinner= document.getElementById('kw-email-spinner');
+const emailLabel  = document.getElementById('kw-send-otp-label');
+const emailError  = document.getElementById('kw-email-error');
+const otpDesc     = document.getElementById('kw-otp-desc');
+const otpInput    = document.getElementById('kw-otp-input');
+const verifyBtn   = document.getElementById('kw-verify-btn');
+const otpSpinner  = document.getElementById('kw-otp-spinner');
+const verifyLabel = document.getElementById('kw-verify-label');
+const otpError    = document.getElementById('kw-otp-error');
+const backBtn     = document.getElementById('kw-back-btn');
+const resendBtn   = document.getElementById('kw-resend-btn');
+const messagesEl  = document.getElementById('kw-messages');
+const messageInput= document.getElementById('kw-message-input');
+const msgSendBtn  = document.getElementById('kw-msg-send-btn');
+
+let wSocket = null;
+function connectWidget() {
+  if (wSocket) return;
+  try {
+    wSocket = io(BACKEND_URL, { transports:['websocket'] });
+    wSocket.on('auth:otp-sent', ()=>{ emailSpinner.style.display='none'; emailLabel.textContent='Получить код →'; sendOtpBtn.disabled=false; showOtpStep(); });
+    wSocket.on('auth:success', ({sessionId,history})=>{ otpSpinner.style.display='none'; verifyLabel.textContent='Подтвердить'; verifyBtn.disabled=false; wState.sessionId=sessionId; localStorage.setItem('kiri_email',wState.email); localStorage.setItem('kiri_session',sessionId); if(history?.length){history.forEach(m=>appendMessage(m,false));scrollToBottom();} showChatScreen(); });
+    wSocket.on('auth:error', ({message})=>{ emailSpinner.style.display='none'; emailLabel.textContent='Получить код →'; sendOtpBtn.disabled=false; otpSpinner.style.display='none'; verifyLabel.textContent='Подтвердить'; verifyBtn.disabled=false; if(stepEmail.style.display!=='none')emailError.textContent=message; else otpError.textContent=message; });
+    wSocket.on('chat:message', (msg)=>{ appendMessage(msg,true); if(!wState.isOpen&&msg.from==='admin'){wState.unread++; badge.textContent=wState.unread; badge.classList.add('visible');} });
+  } catch(e) { console.warn('Widget: no backend connection'); }
+}
+
+function openWidget() {
+  connectWidget();
+  wState.isOpen=true; widget.classList.add('open'); chatBtn.style.transform='scale(0.9)';
+  wState.unread=0; badge.classList.remove('visible');
+  if(wState.sessionId)showChatScreen(); else showEmailStep();
+}
+function closeWidget() { wState.isOpen=false; widget.classList.remove('open'); chatBtn.style.transform=''; }
+chatBtn.addEventListener('click',()=>wState.isOpen?closeWidget():openWidget());
+closeBtn.addEventListener('click',closeWidget);
+
+function showEmailStep() { authScreen.style.display='flex'; chatScreen.style.display='none'; stepEmail.style.display='flex'; stepOtp.style.display='none'; emailError.textContent=''; emailInput.focus(); }
+function showOtpStep() { stepEmail.style.display='none'; stepOtp.style.display='flex'; otpDesc.textContent=`Отправили 6-значный код на ${wState.email}`; otpError.textContent=''; otpInput.value=''; otpInput.focus(); }
+function showChatScreen() { authScreen.style.display='none'; chatScreen.style.display='flex'; document.getElementById('kw-welcome-time').textContent=formatTime(Date.now()); messageInput.focus(); }
+
+function requestOtp() {
+  const email=emailInput.value.trim();
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){emailError.textContent='Введите корректный email';emailInput.focus();return;}
+  wState.email=email.toLowerCase(); emailError.textContent=''; emailSpinner.style.display='block'; emailLabel.textContent='Отправляем...'; sendOtpBtn.disabled=true;
+  if(wSocket)wSocket.emit('auth:request-otp',{email:wState.email});
+}
+sendOtpBtn.addEventListener('click',requestOtp);
+emailInput.addEventListener('keydown',e=>{if(e.key==='Enter')requestOtp();});
+
+function verifyOtp() {
+  const code=otpInput.value.trim();
+  if(!code||code.length<6){otpError.textContent='Введите 6-значный код';otpInput.focus();return;}
+  otpError.textContent=''; otpSpinner.style.display='block'; verifyLabel.textContent='Проверяем...'; verifyBtn.disabled=true;
+  if(wSocket)wSocket.emit('auth:verify-otp',{email:wState.email,code});
+}
+verifyBtn.addEventListener('click',verifyOtp);
+otpInput.addEventListener('keydown',e=>{if(e.key==='Enter')verifyOtp();});
+backBtn.addEventListener('click',showEmailStep);
+resendBtn.addEventListener('click',()=>{ otpError.textContent=''; if(wSocket)wSocket.emit('auth:request-otp',{email:wState.email}); otpInput.value=''; otpError.textContent='Новый код отправлен ✓'; setTimeout(()=>{otpError.style.color='';},2000); });
+
+function sendMessage() {
+  const text=messageInput.value.trim(); if(!text||!wState.sessionId)return;
+  if(wSocket)wSocket.emit('user:message',{sessionId:wState.sessionId,text});
+  messageInput.value=''; messageInput.style.height='auto';
+}
+msgSendBtn.addEventListener('click',sendMessage);
+messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
+messageInput.addEventListener('input',()=>{messageInput.style.height='auto';messageInput.style.height=messageInput.scrollHeight+'px';});
+
+function appendMessage(msg,scroll=true) {
+  const isAdmin=msg.from==='admin'||msg.isAdmin;
+  const wrapper=document.createElement('div'); wrapper.className=`kw-msg ${isAdmin?'admin':'user'}`;
+  if(isAdmin){wrapper.innerHTML=`<div class="kw-msg-sender"><span class="bot-icon"><svg viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3V3h-2v2H9V3H7v2H4c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9h-2z"/></svg></span>Поддержка KiriPilot</div><div class="kw-msg-bubble">${escapeHtml(msg.text)}</div><div class="kw-msg-time">${formatTime(msg.timestamp)}</div>`;}
+  else{wrapper.innerHTML=`<div class="kw-msg-bubble">${escapeHtml(msg.text)}</div><div class="kw-msg-time">${formatTime(msg.timestamp)}</div>`;}
+  messagesEl.appendChild(wrapper); if(scroll)scrollToBottom();
+}
+function scrollToBottom(){messagesEl.scrollTop=messagesEl.scrollHeight;}
+function formatTime(ts){return new Date(ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});}
+function escapeHtml(str){return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\n/g,'<br/>');}
+</script>
+
+</body>
+</html>
