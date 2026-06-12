@@ -8,15 +8,18 @@ const crypto     = require('crypto');
 
 const app    = express();
 const server = http.createServer(app);
-const io     = socketIO(server, { cors: { origin: '*', methods: ['GET','POST'] } });
+const io     = socketIO(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
 
-const pendingOTPs = new Map();
-const sessions    = new Map();
-const admins      = new Map();
+// ── Хранилища (в памяти) ──
+const pendingOTPs = new Map(); // email -> { code, expires, attempts }
+const sessions    = new Map(); // sessionId -> { email, socketId, messages[], createdAt }
+const admins      = new Map(); // socketId -> { name }
+const otpThrottle = new Map(); // email -> [timestamps]
 
+// ── Почта ──
 const transporter = nodemailer.createTransport({
   host:   process.env.SMTP_HOST,
-  port:   parseInt(process.env.SMTP_PORT) || 587,
+  port:   parseInt(process.env.SMTP_PORT, 10) || 587,
   secure: process.env.SMTP_SECURE === 'true',
   auth:   { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
 });
@@ -60,89 +63,171 @@ async function sendOtpEmail(email, otp) {
   });
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
 app.get('/',           (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/start',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'start.html')));
 app.get('/kiri-admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+
+function notifyAdminsUserOnline(sessionId, session) {
+  io.to('admins').emit('admin:user-online', {
+    sessionId,
+    email: session.email,
+    messageCount: session.messages.length,
+  });
+}
 
 io.on('connection', (socket) => {
 
-  socket.on('auth:request-otp', async ({ email }) => {
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+  // ── Запрос кода на почту ──
+  socket.on('auth:request-otp', async ({ email } = {}) => {
+    if (!email || !EMAIL_RE.test(email)) {
       return socket.emit('auth:error', { message: 'Некорректный email' });
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    pendingOTPs.set(email.toLowerCase(), { code: otp, expires: Date.now() + 10*60*1000 });
+    }
+    const key = email.toLowerCase();
+
+    // Анти-спам: не больше 3 кодов на адрес за 10 минут
+    const now    = Date.now();
+    const recent = (otpThrottle.get(key) || []).filter((t) => now - t < 10 * 60 * 1000);
+    if (recent.length >= 3) {
+      return socket.emit('auth:error', { message: 'Слишком много запросов. Попробуйте через 10 минут.' });
+    }
+    recent.push(now);
+    otpThrottle.set(key, recent);
+
+    const otp = String(crypto.randomInt(100000, 1000000));
+    pendingOTPs.set(key, { code: otp, expires: now + 10 * 60 * 1000, attempts: 0 });
+
     try {
-      await sendOtpEmail(email, otp);
-      socket.emit('auth:otp-sent', { email });
+      await sendOtpEmail(key, otp);
+      socket.emit('auth:otp-sent', { email: key });
     } catch (err) {
-      socket.emit('auth:error', { message: 'Не удалось отправить письмо.' });
+      console.error('SMTP error:', err.message);
+      pendingOTPs.delete(key);
+      socket.emit('auth:error', { message: 'Не удалось отправить письмо. Попробуйте позже.' });
     }
   });
 
-  socket.on('auth:verify-otp', ({ email, code }) => {
-    const normalEmail = email?.toLowerCase();
-    const pending = pendingOTPs.get(normalEmail);
+  // ── Проверка кода ──
+  socket.on('auth:verify-otp', ({ email, code } = {}) => {
+    const key     = email ? String(email).toLowerCase() : null;
+    const pending = key && pendingOTPs.get(key);
     if (!pending) return socket.emit('auth:error', { message: 'Код не найден. Запросите новый.' });
-    if (Date.now() > pending.expires) { pendingOTPs.delete(normalEmail); return socket.emit('auth:error', { message: 'Код истёк.' }); }
-    if (pending.code !== String(code).trim()) return socket.emit('auth:error', { message: 'Неверный код.' });
-    pendingOTPs.delete(normalEmail);
+    if (Date.now() > pending.expires) {
+      pendingOTPs.delete(key);
+      return socket.emit('auth:error', { message: 'Код истёк. Запросите новый.' });
+    }
+    pending.attempts += 1;
+    if (pending.attempts > 5) {
+      pendingOTPs.delete(key);
+      return socket.emit('auth:error', { message: 'Слишком много попыток. Запросите новый код.' });
+    }
+    if (pending.code !== String(code ?? '').trim()) {
+      return socket.emit('auth:error', { message: 'Неверный код.' });
+    }
+    pendingOTPs.delete(key);
+
+    // Ищем существующую сессию по email или создаём новую
     let sessionId = null;
     for (const [id, s] of sessions.entries()) {
-      if (s.email === normalEmail) { sessionId = id; s.socketId = socket.id; break; }
+      if (s.email === key) { sessionId = id; s.socketId = socket.id; break; }
     }
     if (!sessionId) {
       sessionId = crypto.randomUUID();
-      sessions.set(sessionId, { email: normalEmail, socketId: socket.id, messages: [], createdAt: Date.now() });
+      sessions.set(sessionId, { email: key, socketId: socket.id, messages: [], createdAt: Date.now() });
     }
+
     socket.sessionId = sessionId;
-    socket.userEmail = normalEmail;
+    socket.userEmail = key;
     socket.join(`session:${sessionId}`);
+
     const session = sessions.get(sessionId);
-    socket.emit('auth:success', { sessionId, email: normalEmail, history: session.messages });
-    io.to('admins').emit('admin:user-online', { sessionId, email: normalEmail, messageCount: session.messages.length });
+    socket.emit('auth:success', { sessionId, email: key, history: session.messages });
+    notifyAdminsUserOnline(sessionId, session);
   });
 
-  socket.on('user:message', ({ sessionId, text }) => {
+  // ── Возобновление сессии после перезагрузки страницы ──
+  socket.on('session:resume', ({ sessionId } = {}) => {
+    const session = sessionId && sessions.get(sessionId);
+    if (!session) return socket.emit('session:invalid');
+    session.socketId = socket.id;
+    socket.sessionId = sessionId;
+    socket.userEmail = session.email;
+    socket.join(`session:${sessionId}`);
+    socket.emit('session:resumed', { sessionId, email: session.email, history: session.messages });
+    notifyAdminsUserOnline(sessionId, session);
+  });
+
+  // ── Сообщение от пользователя ──
+  socket.on('user:message', ({ sessionId, text } = {}) => {
     if (!sessionId || !text?.trim()) return;
     const session = sessions.get(sessionId);
-    if (!session) return socket.emit('error', { message: 'Сессия не найдена' });
-    const message = { id: crypto.randomUUID(), from: 'user', email: session.email, text: text.trim(), timestamp: Date.now() };
+    if (!session) return socket.emit('session:invalid');
+    if (!socket.rooms.has(`session:${sessionId}`)) socket.join(`session:${sessionId}`);
+    const message = {
+      id:        crypto.randomUUID(),
+      from:      'user',
+      email:     session.email,
+      text:      text.trim().slice(0, 4000),
+      timestamp: Date.now(),
+    };
     session.messages.push(message);
     socket.emit('chat:message', message);
     io.to('admins').emit('admin:message', { ...message, sessionId });
   });
 
-  socket.on('admin:login', ({ token, name }) => {
-    if (token !== process.env.ADMIN_TOKEN) return socket.emit('admin:auth-error', { message: 'Неверный токен' });
+  // ── Вход админа ──
+  socket.on('admin:login', ({ token, name } = {}) => {
+    if (!process.env.ADMIN_TOKEN || token !== process.env.ADMIN_TOKEN) {
+      return socket.emit('admin:auth-error', { message: 'Неверный токен' });
+    }
     const adminName = (name?.trim() || 'Модератор').substring(0, 30);
     socket.join('admins');
     socket.isAdmin   = true;
     socket.adminName = adminName;
     admins.set(socket.id, { name: adminName });
+
     const activeSessions = [];
     for (const [id, s] of sessions.entries()) {
-      activeSessions.push({ sessionId: id, email: s.email, messageCount: s.messages.length, lastMessage: s.messages.at(-1)||null, createdAt: s.createdAt });
+      activeSessions.push({
+        sessionId:    id,
+        email:        s.email,
+        messageCount: s.messages.length,
+        lastMessage:  s.messages.at(-1) || null,
+        createdAt:    s.createdAt,
+      });
     }
     socket.emit('admin:auth-success', { name: adminName, sessions: activeSessions });
     socket.to('admins').emit('admin:colleague-joined', { name: adminName });
   });
 
-  socket.on('admin:get-history', ({ sessionId }) => {
+  // ── История для админа ──
+  socket.on('admin:get-history', ({ sessionId } = {}) => {
     if (!socket.isAdmin) return;
     const session = sessions.get(sessionId);
     if (!session) return;
     socket.emit('admin:history', { sessionId, email: session.email, messages: session.messages });
   });
 
-  socket.on('admin:reply', ({ sessionId, text }) => {
+  // ── Ответ админа ──
+  socket.on('admin:reply', ({ sessionId, text } = {}) => {
     if (!socket.isAdmin || !text?.trim()) return;
     const session = sessions.get(sessionId);
     if (!session) return;
-    const stored = { id: crypto.randomUUID(), from: 'admin', adminName: socket.adminName, text: text.trim(), timestamp: Date.now() };
+    const stored = {
+      id:        crypto.randomUUID(),
+      from:      'admin',
+      adminName: socket.adminName,
+      text:      text.trim().slice(0, 4000),
+      timestamp: Date.now(),
+    };
     session.messages.push(stored);
-    io.to(`session:${sessionId}`).emit('chat:message', { id: stored.id, from: 'admin', isAdmin: true, text: stored.text, timestamp: stored.timestamp });
+    io.to(`session:${sessionId}`).emit('chat:message', {
+      id: stored.id, from: 'admin', isAdmin: true, text: stored.text, timestamp: stored.timestamp,
+    });
     io.to('admins').emit('admin:message', { ...stored, sessionId });
   });
 
@@ -157,5 +242,6 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`\n🚀 KiriPilot запущен: http://localhost:${PORT}`);
+  console.log(`   Чат поддержки:   http://localhost:${PORT}/start`);
   console.log(`   Админ-панель:    http://localhost:${PORT}/kiri-admin\n`);
 });
