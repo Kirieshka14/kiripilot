@@ -750,7 +750,7 @@ async function mSendOtp(){
   document.getElementById('m-send-spin').style.display='block';
   document.getElementById('m-send-lbl').textContent='Отправляем…';
   document.getElementById('m-send-btn').disabled=true;
-  if(W.socket)W.socket.emit('auth:request-otp',{email:M.email});
+  connect(); W.email=M.email; if(W.socket)W.socket.emit('auth:request-otp',{email:M.email}); else{mSetEmailLoad(false);document.getElementById('m-email-err').textContent='Нет соединения с сервером'}
   else{mSetEmailLoad(false);document.getElementById('m-email-err').textContent='Нет соединения с сервером'}
 }
 function mSetEmailLoad(on){
