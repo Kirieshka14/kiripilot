@@ -7,956 +7,506 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
-/* ═══════════════════════════════════════════
-   RESET & TOKENS
-═══════════════════════════════════════════ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080f;--s1:#0d1022;--s2:#121630;--s3:#1a1f3a;
+  --a:#5b9cf6;--a2:#b08ef8;--ok:#4ade80;--err:#f87171;
+  --txt:#eceef8;--muted:#6b7280;
+  --b:rgba(91,156,246,0.15);--b2:rgba(91,156,246,0.3);
+  --glow:rgba(91,156,246,0.4);--r:14px;--nav:1080px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+#cv{position:fixed;inset:0;z-index:0;pointer-events:none}
 
-:root {
-  --bg:        #07080f;
-  --surface:   #0d1022;
-  --surface2:  #121630;
-  --surface3:  #191e38;
-  --accent:    #4f8ef7;
-  --accent2:   #a78bfa;
-  --success:   #4ade80;
-  --danger:    #f87171;
-  --text:      #e8eaf6;
-  --muted:     #6b7280;
-  --border:    rgba(79,142,247,0.16);
-  --border2:   rgba(79,142,247,0.28);
-  --glow:      rgba(79,142,247,0.4);
-  --radius:    14px;
-  --max-w:     1080px;
+/* ── NAV ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  background:rgba(7,8,15,0.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--b);
 }
+.nav-inner{
+  max-width:var(--nav);margin:0 auto;padding:0 2rem;
+  height:62px;display:flex;align-items:center;gap:1rem;
+}
+.nav-logo{
+  font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:700;
+  background:linear-gradient(135deg,var(--a),var(--a2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  text-decoration:none;flex-shrink:0;letter-spacing:-0.01em;
+}
+.nav-links{display:flex;list-style:none;gap:0.1rem;flex:1}
+.nav-links a{
+  color:var(--muted);text-decoration:none;font-size:0.875rem;font-weight:500;
+  padding:0.4rem 0.9rem;border-radius:100px;
+  transition:color .2s,background .2s;white-space:nowrap;
+}
+.nav-links a:hover{color:var(--txt);background:rgba(255,255,255,0.06)}
+.nav-links a.act{color:var(--txt);background:rgba(91,156,246,0.12)}
+.nav-right{display:flex;align-items:center;gap:0.5rem;flex-shrink:0}
+.btn-ghost{
+  background:none;border:1px solid var(--b2);color:var(--txt);
+  font-family:'Inter',sans-serif;font-size:0.84rem;font-weight:500;
+  padding:0.4rem 1rem;border-radius:100px;cursor:pointer;
+  transition:background .2s,border-color .2s;white-space:nowrap;
+}
+.btn-ghost:hover{background:rgba(255,255,255,0.06);border-color:var(--a)}
+.btn-pill{
+  background:linear-gradient(135deg,var(--a),var(--a2));border:none;color:#fff;
+  font-family:'Inter',sans-serif;font-size:0.84rem;font-weight:600;
+  padding:0.42rem 1.15rem;border-radius:100px;cursor:pointer;
+  transition:opacity .2s,transform .15s;box-shadow:0 0 18px rgba(91,156,246,0.35);
+  white-space:nowrap;
+}
+.btn-pill:hover{opacity:.88;transform:translateY(-1px)}
+.burger{
+  display:none;flex-direction:column;gap:5px;
+  width:36px;height:36px;background:none;border:none;cursor:pointer;
+  padding:7px;border-radius:8px;flex-shrink:0;transition:background .2s;
+}
+.burger:hover{background:rgba(255,255,255,0.06)}
+.burger span{display:block;height:2px;background:var(--txt);border-radius:2px;transition:transform .3s,opacity .3s}
+.burger span:nth-child(2){width:70%}
+.nav.open .burger span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav.open .burger span:nth-child(2){opacity:0}
+.nav.open .burger span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mob-menu{
+  display:none;flex-direction:column;
+  border-top:1px solid var(--b);
+  max-height:0;overflow:hidden;
+  transition:max-height .4s ease,padding .3s;
+}
+.nav.open .mob-menu{max-height:500px;padding:.75rem 1.5rem 1.25rem}
+.mob-menu a{
+  display:block;color:var(--muted);text-decoration:none;
+  font-size:.95rem;padding:.65rem 1rem;border-radius:10px;
+  transition:color .2s,background .2s;
+}
+.mob-menu a:hover{color:var(--txt);background:rgba(255,255,255,0.05)}
+.mob-div{height:1px;background:var(--b);margin:.4rem 0}
+.mob-btns{display:flex;gap:.5rem;margin-top:.25rem}
+.mob-btns button{flex:1}
 
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
+/* ── MODAL ── */
+.overlay{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(7,8,15,0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;padding:1.5rem;
+  opacity:0;pointer-events:none;transition:opacity .3s;
 }
+.overlay.on{opacity:1;pointer-events:all}
+.modal{
+  width:100%;max-width:390px;
+  background:var(--s1);border:1px solid var(--b2);border-radius:22px;
+  padding:2.2rem 2rem;position:relative;
+  transform:translateY(16px) scale(.97);
+  transition:transform .35s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 0 80px rgba(91,156,246,0.1),0 28px 70px rgba(0,0,0,0.6);
+}
+.overlay.on .modal{transform:none}
+.modal-x{
+  position:absolute;top:1rem;right:1.2rem;
+  background:none;border:none;cursor:pointer;
+  color:var(--muted);font-size:1.1rem;line-height:1;
+  transition:color .2s;
+}
+.modal-x:hover{color:var(--txt)}
+.modal-logo{
+  font-family:'Space Grotesk',sans-serif;font-size:1.35rem;font-weight:700;
+  background:linear-gradient(135deg,var(--a),var(--a2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:.2rem;
+}
+.modal-sub{font-size:.75rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.8rem}
 
-/* ═══════════════════════════════════════════
-   STARFIELD
-═══════════════════════════════════════════ */
-#stars-canvas {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+/* Modal steps */
+.m-step{display:flex;flex-direction:column;gap:1rem}
+.m-step.hidden{display:none}
+.m-icon{text-align:center}
+.m-icon svg{width:44px;height:44px;stroke:var(--a);fill:none;stroke-width:1.5;filter:drop-shadow(0 0 12px rgba(91,156,246,0.5))}
+.m-title{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:600;text-align:center}
+.m-desc{font-size:.82rem;color:var(--muted);text-align:center;line-height:1.6}
+.m-label{font-size:.72rem;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.4rem;display:block}
+.m-inp{
+  width:100%;background:var(--s2);border:1px solid var(--b);border-radius:10px;
+  padding:.72rem .9rem;font-size:.9rem;color:var(--txt);
+  font-family:'Inter',sans-serif;outline:none;
+  transition:border-color .2s,box-shadow .2s;
 }
+.m-inp::placeholder{color:var(--muted)}
+.m-inp:focus{border-color:var(--a);box-shadow:0 0 0 3px rgba(91,156,246,0.12)}
+.m-inp.otp-style{letter-spacing:.35em;font-size:1.4rem;text-align:center;font-weight:600}
+.m-btn{
+  width:100%;padding:.75rem;
+  background:linear-gradient(135deg,var(--a),var(--a2));
+  color:#fff;font-family:'Space Grotesk',sans-serif;
+  font-size:.95rem;font-weight:600;border:none;border-radius:10px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:opacity .2s,transform .15s;box-shadow:0 0 22px rgba(91,156,246,0.3);
+}
+.m-btn:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}
+.m-btn:disabled{opacity:.45;cursor:not-allowed}
+.m-spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;display:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.m-err{font-size:.78rem;color:var(--err);text-align:center;min-height:16px}
+.m-hint{font-size:.78rem;color:var(--muted);text-align:center}
+.m-hint button{background:none;border:none;cursor:pointer;color:var(--a);font-size:.78rem;font-weight:600;text-decoration:underline}
+.m-back{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.78rem;text-align:center;transition:color .2s}
+.m-back:hover{color:var(--a)}
+/* User info in nav after login */
+.nav-user{display:flex;align-items:center;gap:.6rem}
+.nav-user-name{font-size:.82rem;color:var(--muted);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-user-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok);flex-shrink:0}
 
-/* ═══════════════════════════════════════════
-   NAVIGATION
-═══════════════════════════════════════════ */
-.nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  background: rgba(7,8,15,0.8);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-}
-.nav-inner {
-  max-width: var(--max-w);
-  margin: 0 auto;
-  padding: 0 2rem;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-.nav-logo {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.15rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-decoration: none;
-  flex-shrink: 0;
-}
-.nav-links {
-  display: flex;
-  list-style: none;
-  gap: 0.15rem;
-  flex: 1;
-}
-.nav-links a {
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.4rem 0.85rem;
-  border-radius: 100px;
-  transition: color 0.2s, background 0.2s;
-  white-space: nowrap;
-}
-.nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.06); }
-.nav-links a.active { color: var(--text); background: rgba(79,142,247,0.12); }
+/* ── PAGE ── */
+.page{position:relative;z-index:1}
+section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:center}
+.inner{width:100%;max-width:var(--nav)}
+.eyebrow{font-size:.7rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--a);margin-bottom:.6rem}
+.sec-h{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.5rem,4vw,2.4rem);font-weight:700;line-height:1.2;letter-spacing:-.02em;margin-bottom:.85rem}
+.sec-p{font-size:1rem;color:#8e93b0;line-height:1.7;max-width:540px;margin-bottom:2.8rem}
+.div{width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--b2),transparent)}
 
-/* Auth buttons top-right */
-.nav-auth {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5rem 2rem 4rem;text-align:center}
+.hud{position:relative;width:300px;height:300px;display:flex;align-items:center;justify-content:center}
+.hud svg{position:absolute;inset:0;width:100%;height:100%}
+.sp1{animation:rot 20s linear infinite}
+.sp2{animation:rot 14s linear infinite reverse}
+@keyframes rot{to{transform:rotate(360deg)}}
+.hcard{position:relative;z-index:2;padding:1rem 1.5rem}
+.hlogo{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(2rem,7vw,3rem);font-weight:700;letter-spacing:-.03em;
+  background:linear-gradient(135deg,var(--a),var(--a2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:.25rem;
 }
-.btn-ghost {
-  background: none;
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.84rem;
-  font-weight: 500;
-  padding: 0.42rem 1rem;
-  border-radius: 100px;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-  white-space: nowrap;
+.htag{font-size:.72rem;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:1.6rem}
+.hlead{font-family:'Space Grotesk',sans-serif;font-size:clamp(.95rem,2.5vw,1.2rem);line-height:1.55;color:var(--txt);margin-bottom:1.8rem}
+.hcta{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:linear-gradient(135deg,var(--a),var(--a2));
+  color:#fff;font-family:'Space Grotesk',sans-serif;
+  font-size:1rem;font-weight:600;padding:.8rem 2.2rem;
+  border:none;border-radius:100px;cursor:pointer;text-decoration:none;
+  transition:transform .2s,box-shadow .2s;box-shadow:0 0 28px var(--glow);
 }
-.btn-ghost:hover { background: rgba(255,255,255,0.06); border-color: var(--accent); }
-.btn-accent {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border: none;
-  color: #fff;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.84rem;
-  font-weight: 600;
-  padding: 0.42rem 1.1rem;
-  border-radius: 100px;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
-  box-shadow: 0 0 16px rgba(79,142,247,0.35);
-  white-space: nowrap;
-}
-.btn-accent:hover { opacity: 0.88; transform: translateY(-1px); }
+.hcta:hover{transform:translateY(-3px);box-shadow:0 0 48px var(--glow)}
+.hcta .arr{transition:transform .2s}
+.hcta:hover .arr{transform:translateX(4px)}
 
-/* Burger */
-.burger {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  width: 36px; height: 36px;
-  background: none; border: none; cursor: pointer;
-  padding: 7px; border-radius: 8px;
-  flex-shrink: 0;
-  transition: background 0.2s;
+/* ABOUT */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:1rem}
+.card{
+  background:var(--s1);border:1px solid var(--b);border-radius:var(--r);padding:1.6rem;
+  transition:border-color .3s,transform .3s;
 }
-.burger:hover { background: rgba(255,255,255,0.06); }
-.burger span { display: block; height: 2px; background: var(--text); border-radius: 2px; transition: transform 0.3s, opacity 0.3s, width 0.3s; }
-.burger span:nth-child(1) { width: 100%; }
-.burger span:nth-child(2) { width: 70%; }
-.burger span:nth-child(3) { width: 100%; }
-.nav.open .burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.nav.open .burger span:nth-child(2) { opacity: 0; width: 0; }
-.nav.open .burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.card:hover{border-color:var(--b2);transform:translateY(-4px)}
+.card .ic{font-size:1.5rem;margin-bottom:.8rem;display:block}
+.card h3{font-family:'Space Grotesk',sans-serif;font-size:.97rem;font-weight:600;margin-bottom:.4rem}
+.card p{font-size:.85rem;color:#8e93b0;line-height:1.6}
 
-.nav-mobile {
-  display: none;
-  flex-direction: column;
-  padding: 0.75rem 1.5rem 1.25rem;
-  border-top: 1px solid var(--border);
-  gap: 0.25rem;
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.4s ease, padding 0.3s;
-}
-.nav.open .nav-mobile { max-height: 500px; padding: 0.75rem 1.5rem 1.25rem; }
-.nav-mobile a {
-  display: block;
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 0.95rem;
-  padding: 0.7rem 1rem;
-  border-radius: 10px;
-  transition: color 0.2s, background 0.2s;
-}
-.nav-mobile a:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-.nav-mobile .mob-divider { height: 1px; background: var(--border); margin: 0.4rem 0; }
-.nav-mobile .mob-btn-row { display: flex; gap: 0.5rem; margin-top: 0.25rem; }
-.nav-mobile .mob-btn-row button { flex: 1; justify-content: center; }
+/* PRICING */
+#pricing{background:linear-gradient(180deg,var(--bg),var(--s1) 50%,var(--bg))}
+.plans{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,265px),1fr));gap:1.2rem;width:100%;max-width:620px}
+.plan{background:var(--s2);border:1px solid var(--b);border-radius:20px;padding:2rem;position:relative;display:flex;flex-direction:column;transition:transform .3s,border-color .3s}
+.plan:hover{transform:translateY(-4px);border-color:var(--b2)}
+.plan.hot{border-color:rgba(91,156,246,0.45);background:linear-gradient(160deg,#0f1529,#111630);box-shadow:0 0 50px rgba(91,156,246,0.1)}
+.plan-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .9rem;border-radius:100px;white-space:nowrap}
+.plan-name{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:.35rem}
+.plan-desc{font-size:.83rem;color:var(--muted);line-height:1.5;margin-bottom:1.3rem}
+.plan-price{display:flex;align-items:baseline;gap:.25rem;margin-bottom:1.5rem}
+.plan-price .amt{font-family:'Space Grotesk',sans-serif;font-size:2.3rem;font-weight:700;background:linear-gradient(135deg,var(--a),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.plan-price .per{font-size:.83rem;color:var(--muted)}
+.plan-feats{list-style:none;display:flex;flex-direction:column;gap:.55rem;margin-bottom:1.7rem;flex:1}
+.plan-feats li{display:flex;align-items:center;gap:.55rem;font-size:.86rem;color:#c4c9e8}
+.plan-feats .ck{color:var(--a);flex-shrink:0}
+.plan-btn{display:block;text-align:center;padding:.72rem;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;border:none;transition:opacity .2s,transform .15s}
+.plan-btn:hover{opacity:.88;transform:translateY(-1px)}
+.plan.hot .plan-btn{background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;box-shadow:0 0 20px rgba(91,156,246,0.3)}
+.plan:not(.hot) .plan-btn{background:rgba(91,156,246,0.1);color:var(--a);border:1px solid rgba(91,156,246,0.25)}
+.plan-note{margin-top:1.5rem;font-size:.78rem;color:var(--muted);text-align:center;max-width:560px;line-height:1.6}
 
-/* ═══════════════════════════════════════════
-   AUTH MODAL (Login / Register)
-═══════════════════════════════════════════ */
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 1000;
-  background: rgba(7,8,15,0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  display: flex; align-items: center; justify-content: center;
-  padding: 1.5rem;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.3s;
-}
-.modal-overlay.show { opacity: 1; pointer-events: all; }
-.modal-box {
-  width: 100%; max-width: 400px;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  padding: 2.25rem 2rem;
-  position: relative;
-  transform: translateY(16px) scale(0.97);
-  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
-  box-shadow: 0 0 60px rgba(79,142,247,0.1), 0 24px 60px rgba(0,0,0,0.6);
-}
-.modal-overlay.show .modal-box { transform: none; }
-.modal-close {
-  position: absolute; top: 1rem; right: 1.2rem;
-  background: none; border: none; cursor: pointer;
-  color: var(--muted); font-size: 1.2rem; line-height: 1;
-  transition: color 0.2s;
-}
-.modal-close:hover { color: var(--text); }
-.modal-logo {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.4rem; font-weight: 700;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  margin-bottom: 0.3rem;
-}
-.modal-subtitle {
-  font-size: 0.8rem; color: var(--muted);
-  letter-spacing: 0.08em; text-transform: uppercase;
-  margin-bottom: 1.8rem;
-}
-.modal-tabs {
-  display: flex; gap: 0; margin-bottom: 1.6rem;
-  background: var(--surface2); border-radius: 10px; padding: 3px;
-}
-.modal-tab {
-  flex: 1; padding: 0.5rem; border: none; background: none; cursor: pointer;
-  font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 500;
-  color: var(--muted); border-radius: 8px;
-  transition: background 0.2s, color 0.2s;
-}
-.modal-tab.active { background: var(--surface3); color: var(--text); }
-.modal-field { margin-bottom: 1rem; }
-.modal-label {
-  display: block; font-size: 0.75rem; font-weight: 500;
-  color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase;
-  margin-bottom: 0.45rem;
-}
-.modal-input {
-  width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 0.7rem 0.9rem;
-  font-size: 0.9rem; color: var(--text);
-  font-family: 'Inter', sans-serif;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.modal-input::placeholder { color: var(--muted); }
-.modal-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(79,142,247,0.12);
-}
-.modal-submit {
-  width: 100%; margin-top: 0.5rem;
-  padding: 0.75rem;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border: none; border-radius: 10px;
-  color: #fff; font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.95rem; font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  box-shadow: 0 0 20px rgba(79,142,247,0.3);
-}
-.modal-submit:hover { opacity: 0.88; }
-.modal-error {
-  margin-top: 0.75rem;
-  font-size: 0.8rem; color: var(--danger);
-  text-align: center; min-height: 18px;
-}
-.modal-switch {
-  margin-top: 1rem; text-align: center;
-  font-size: 0.82rem; color: var(--muted);
-}
-.modal-switch button {
-  background: none; border: none; cursor: pointer;
-  color: var(--accent); font-size: 0.82rem; font-weight: 600;
-  text-decoration: underline;
-}
-
-/* ═══════════════════════════════════════════
-   PAGE CONTENT
-═══════════════════════════════════════════ */
-.page { position: relative; z-index: 1; }
-
-/* ── HERO ── */
-.hero {
-  min-height: 100vh;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 5rem 2rem 4rem;
-  text-align: center;
-}
-.hud {
-  position: relative;
-  width: 320px; height: 320px;
-  display: flex; align-items: center; justify-content: center;
-}
-.hud svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.hud-spin  { animation: spin 20s linear infinite; }
-.hud-rspin { animation: spin 14s linear infinite reverse; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.hero-card { position: relative; z-index: 2; text-align: center; padding: 1.5rem 2rem; }
-.hero-logo {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(2rem, 7vw, 3.2rem);
-  font-weight: 700; letter-spacing: -0.03em;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  margin-bottom: 0.3rem;
-}
-.hero-tag {
-  font-size: 0.8rem; color: var(--muted);
-  letter-spacing: 0.12em; text-transform: uppercase;
-  margin-bottom: 1.8rem;
-}
-.hero-lead {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(1rem, 2.5vw, 1.25rem);
-  font-weight: 400; line-height: 1.55; color: var(--text);
-  margin-bottom: 2rem;
-}
-.hero-cta {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff; font-family: 'Space Grotesk', sans-serif;
-  font-size: 1rem; font-weight: 600;
-  padding: 0.8rem 2.2rem; border: none; border-radius: 100px;
-  cursor: pointer; text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 0 28px var(--glow);
-}
-.hero-cta:hover { transform: translateY(-3px); box-shadow: 0 0 48px var(--glow); }
-.hero-cta .arr { transition: transform 0.2s; }
-.hero-cta:hover .arr { transform: translateX(4px); }
-
-/* ── DIVIDER ── */
-.divider {
-  width: 100%; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border2), transparent);
-}
-
-/* ── SECTIONS ── */
-section {
-  padding: 6rem 2rem 5rem;
-  display: flex; flex-direction: column; align-items: center;
-}
-.sec-inner { width: 100%; max-width: var(--max-w); }
-.eyebrow {
-  font-size: 0.72rem; font-weight: 600;
-  letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 0.6rem;
-}
-.sec-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(1.5rem, 4vw, 2.4rem);
-  font-weight: 700; line-height: 1.2;
-  letter-spacing: -0.02em; margin-bottom: 0.9rem;
-}
-.sec-sub {
-  font-size: 1rem; color: #8e93b0;
-  line-height: 1.7; max-width: 560px;
-  margin-bottom: 3rem;
-}
-
-/* About grid */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
-  gap: 1rem;
-}
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.6rem;
-  transition: border-color 0.3s, transform 0.3s;
-}
-.card:hover { border-color: var(--border2); transform: translateY(-4px); }
-.card .ic { font-size: 1.6rem; margin-bottom: 0.9rem; display: block; }
-.card h3 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1rem; font-weight: 600; margin-bottom: 0.4rem;
-}
-.card p { font-size: 0.88rem; color: #8e93b0; line-height: 1.6; }
-
-/* Pricing */
-#pricing { background: linear-gradient(180deg, var(--bg), var(--surface) 50%, var(--bg)); }
-.pricing-wrap {
-  display: flex; flex-direction: column; align-items: center;
-}
-.plans {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
-  gap: 1.25rem; width: 100%; max-width: 640px;
-}
-.plan {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 20px; padding: 2rem;
-  position: relative; display: flex; flex-direction: column;
-  transition: transform 0.3s, border-color 0.3s;
-}
-.plan:hover { transform: translateY(-4px); border-color: var(--border2); }
-.plan.hot {
-  border-color: rgba(79,142,247,0.45);
-  background: linear-gradient(160deg, #0f1529, #111630);
-  box-shadow: 0 0 50px rgba(79,142,247,0.1);
-}
-.plan-badge {
-  position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff; font-size: 0.7rem; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 0.25rem 0.9rem; border-radius: 100px; white-space: nowrap;
-}
-.plan-name {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem;
-}
-.plan-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-bottom: 1.4rem; }
-.plan-price {
-  display: flex; align-items: baseline; gap: 0.25rem;
-  margin-bottom: 1.6rem;
-}
-.plan-price .amt {
-  font-family: 'Space Grotesk', sans-serif; font-size: 2.4rem; font-weight: 700;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.plan-price .per { font-size: 0.85rem; color: var(--muted); }
-.plan-feats {
-  list-style: none; display: flex; flex-direction: column;
-  gap: 0.6rem; margin-bottom: 1.8rem; flex: 1;
-}
-.plan-feats li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.875rem; color: #c4c9e8; }
-.plan-feats .ck { color: var(--accent); flex-shrink: 0; }
-.plan-btn {
-  display: block; text-align: center; padding: 0.75rem;
-  border-radius: 10px; font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none;
-  transition: opacity 0.2s, transform 0.15s; text-decoration: none;
-}
-.plan-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-.plan.hot .plan-btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 0 20px rgba(79,142,247,0.3); }
-.plan:not(.hot) .plan-btn { background: rgba(79,142,247,0.1); color: var(--accent); border: 1px solid rgba(79,142,247,0.25); }
-.pricing-note { margin-top: 1.5rem; font-size: 0.8rem; color: var(--muted); text-align: center; max-width: 560px; line-height: 1.6; }
-
-/* Support cards */
-.support-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
-  gap: 1rem;
-}
-.sup-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1.6rem 1.8rem;
-  display: flex; flex-direction: column; gap: 0.6rem;
-  transition: border-color 0.3s, transform 0.3s;
-}
-.sup-card:hover { border-color: var(--border2); transform: translateY(-3px); }
-.sup-card .si { font-size: 1.6rem; }
-.sup-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 700; }
-.sup-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; flex: 1; }
-.sup-link {
-  display: inline-flex; align-items: center; gap: 0.3rem;
-  font-size: 0.85rem; font-weight: 600; color: var(--accent);
-  text-decoration: none; cursor: pointer; background: none; border: none;
-  font-family: 'Inter', sans-serif; padding: 0;
-  transition: gap 0.2s;
-}
-.sup-link:hover { gap: 0.5rem; }
+/* SUPPORT */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:1rem}
+.scard{background:var(--s1);border:1px solid var(--b);border-radius:var(--r);padding:1.5rem 1.7rem;display:flex;flex-direction:column;gap:.55rem;transition:border-color .3s,transform .3s}
+.scard:hover{border-color:var(--b2);transform:translateY(-3px)}
+.scard .si{font-size:1.5rem}
+.scard h3{font-family:'Space Grotesk',sans-serif;font-size:.93rem;font-weight:700}
+.scard p{font-size:.83rem;color:var(--muted);line-height:1.6;flex:1}
+.slink{display:inline-flex;align-items:center;gap:.3rem;font-size:.83rem;font-weight:600;color:var(--a);text-decoration:none;cursor:pointer;background:none;border:none;font-family:'Inter',sans-serif;padding:0;transition:gap .2s}
+.slink:hover{gap:.5rem}
 
 /* FAQ */
-.faq { display: flex; flex-direction: column; gap: 0.65rem; max-width: 680px; }
-.faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-.faq-q {
-  width: 100%; background: none; border: none; text-align: left;
-  padding: 1.1rem 1.4rem; font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.92rem; font-weight: 600; color: var(--text); cursor: pointer;
-  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-}
-.faq-q .ch { color: var(--accent); font-size: 0.85rem; transition: transform 0.3s; flex-shrink: 0; }
-.faq-item.open .ch { transform: rotate(180deg); }
-.faq-a {
-  max-height: 0; overflow: hidden;
-  transition: max-height 0.35s ease, padding 0.25s;
-  font-size: 0.875rem; color: #8e93b0; line-height: 1.7;
-}
-.faq-item.open .faq-a { max-height: 240px; padding: 0 1.4rem 1.1rem; }
+.faq{display:flex;flex-direction:column;gap:.6rem;max-width:660px}
+.fitem{background:var(--s1);border:1px solid var(--b);border-radius:12px;overflow:hidden}
+.fq{width:100%;background:none;border:none;text-align:left;padding:1rem 1.3rem;font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:600;color:var(--txt);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.fq .ch{color:var(--a);font-size:.82rem;transition:transform .3s;flex-shrink:0}
+.fitem.open .ch{transform:rotate(180deg)}
+.fa{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .25s;font-size:.85rem;color:#8e93b0;line-height:1.7}
+.fitem.open .fa{max-height:220px;padding:0 1.3rem 1rem}
 
-/* Contact */
-.contact-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 20px; padding: 2.2rem;
-  max-width: 520px; width: 100%;
-}
-.form-row { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 1rem; }
-.form-row label { font-size: 0.75rem; font-weight: 500; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
-.form-row input,
-.form-row textarea,
-.form-row select {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 10px; padding: 0.7rem 0.9rem;
-  color: var(--text); font-family: 'Inter', sans-serif;
-  font-size: 0.9rem; outline: none; resize: none; width: 100%;
-  transition: border-color 0.2s;
-}
-.form-row input:focus,
-.form-row textarea:focus,
-.form-row select:focus { border-color: var(--accent); }
-.form-row input::placeholder,
-.form-row textarea::placeholder { color: var(--muted); }
-.form-row select option { background: var(--surface2); }
-.form-row textarea { min-height: 100px; }
-.form-send {
-  display: inline-flex; align-items: center; gap: 0.45rem;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff; font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.95rem; font-weight: 600; padding: 0.75rem 2rem;
-  border: none; border-radius: 100px; cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 0 20px rgba(79,142,247,0.3);
-}
-.form-send:hover { transform: translateY(-2px); box-shadow: 0 0 36px var(--glow); }
-.form-ok { display: none; text-align: center; padding: 1.2rem 0; font-family: 'Space Grotesk', sans-serif; font-size: 1rem; color: var(--success); }
+/* CONTACT */
+.ccard{background:var(--s1);border:1px solid var(--b);border-radius:20px;padding:2.2rem;max-width:500px;width:100%}
+.crow{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.9rem}
+.crow label{font-size:.72rem;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
+.crow input,.crow textarea,.crow select{background:var(--s2);border:1px solid var(--b);border-radius:10px;padding:.68rem .9rem;color:var(--txt);font-family:'Inter',sans-serif;font-size:.88rem;outline:none;resize:none;width:100%;transition:border-color .2s}
+.crow input:focus,.crow textarea:focus,.crow select:focus{border-color:var(--a)}
+.crow input::placeholder,.crow textarea::placeholder{color:var(--muted)}
+.crow select option{background:var(--s2)}
+.crow textarea{min-height:95px}
+.csend{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;font-family:'Space Grotesk',sans-serif;font-size:.92rem;font-weight:600;padding:.72rem 2rem;border:none;border-radius:100px;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 0 20px rgba(91,156,246,0.3)}
+.csend:hover{transform:translateY(-2px);box-shadow:0 0 36px var(--glow)}
+.cok{display:none;text-align:center;padding:1.2rem 0;font-family:'Space Grotesk',sans-serif;font-size:1rem;color:var(--ok)}
 
-/* Footer */
-.footer {
-  position: relative; z-index: 1;
-  background: var(--surface); border-top: 1px solid var(--border);
-  padding: 2.5rem 2rem;
-  display: flex; flex-direction: column; align-items: center; gap: 1.2rem; text-align: center;
-}
-.footer-logo {
-  font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.footer-links { display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
-.footer-links a { color: var(--muted); font-size: 0.82rem; text-decoration: none; transition: color 0.2s; }
-.footer-links a:hover { color: var(--text); }
-.footer-copy { font-size: 0.75rem; color: var(--muted); }
+/* FOOTER */
+.foot{position:relative;z-index:1;background:var(--s1);border-top:1px solid var(--b);padding:2.5rem 2rem;display:flex;flex-direction:column;align-items:center;gap:1.2rem;text-align:center}
+.foot-logo{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:700;background:linear-gradient(135deg,var(--a),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.foot-links{display:flex;gap:1.1rem;flex-wrap:wrap;justify-content:center}
+.foot-links a{color:var(--muted);font-size:.8rem;text-decoration:none;transition:color .2s}
+.foot-links a:hover{color:var(--txt)}
+.foot-copy{font-size:.73rem;color:var(--muted)}
 
-/* Toast */
-#toast {
-  position: fixed; bottom: 1.8rem; left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: var(--surface); border: 1px solid var(--border2);
-  border-radius: 100px; padding: 0.7rem 1.6rem;
-  font-size: 0.875rem; color: var(--text); z-index: 9000;
-  opacity: 0; pointer-events: none;
-  box-shadow: 0 0 24px rgba(79,142,247,0.15);
-  transition: opacity 0.3s, transform 0.3s;
-  white-space: nowrap;
-}
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* TOAST */
+#toast{position:fixed;bottom:1.8rem;left:50%;transform:translateX(-50%) translateY(10px);background:var(--s1);border:1px solid var(--b2);border-radius:100px;padding:.65rem 1.5rem;font-size:.85rem;color:var(--txt);z-index:9000;opacity:0;pointer-events:none;box-shadow:0 0 24px rgba(91,156,246,0.15);transition:opacity .3s,transform .3s;white-space:nowrap}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ═══════════════════════════════════════════
-   CHAT WIDGET
-═══════════════════════════════════════════ */
-
-/* Trigger button */
-#chat-btn {
-  position: fixed; bottom: 24px; right: 24px; z-index: 8000;
-  width: 58px; height: 58px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 0 0 rgba(79,142,247,0.5);
-  animation: chat-pulse 3s ease-out infinite;
-  transition: transform 0.25s, box-shadow 0.25s;
+/* ══ CHAT WIDGET ══ */
+#cb{
+  position:fixed;bottom:24px;right:24px;z-index:8000;
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--a),var(--a2));
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  animation:cpulse 3s ease-out infinite;
+  transition:transform .25s,box-shadow .25s;
 }
-#chat-btn:hover { transform: scale(1.1); box-shadow: 0 0 28px rgba(79,142,247,0.5); }
-#chat-btn svg { width: 24px; height: 24px; fill: #fff; flex-shrink: 0; }
-@keyframes chat-pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(79,142,247,0.5); }
-  70%  { box-shadow: 0 0 0 12px rgba(79,142,247,0); }
-  100% { box-shadow: 0 0 0 0 rgba(79,142,247,0); }
+#cb:hover{transform:scale(1.1);box-shadow:0 0 28px rgba(91,156,246,0.5)}
+#cb svg{width:23px;height:23px;fill:#fff;flex-shrink:0}
+@keyframes cpulse{0%{box-shadow:0 0 0 0 rgba(91,156,246,0.5)}70%{box-shadow:0 0 0 12px rgba(91,156,246,0)}100%{box-shadow:0 0 0 0 rgba(91,156,246,0)}}
+#cbadge{position:absolute;top:-3px;right:-3px;background:var(--err);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);opacity:0;transform:scale(0);transition:opacity .2s,transform .2s}
+#cbadge.on{opacity:1;transform:scale(1)}
+#cwin{
+  position:fixed;bottom:92px;right:24px;z-index:7999;
+  width:355px;height:510px;
+  background:var(--s1);border:1px solid var(--b2);border-radius:18px;
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 8px 48px rgba(0,0,0,0.7),0 0 60px rgba(91,156,246,0.07);
+  opacity:0;transform:translateY(14px) scale(.97);pointer-events:none;
+  transition:opacity .3s cubic-bezier(.16,1,.3,1),transform .3s cubic-bezier(.16,1,.3,1);
 }
-
-/* Unread badge */
-#chat-badge {
-  position: absolute; top: -3px; right: -3px;
-  background: var(--danger); color: #fff;
-  font-size: 10px; font-weight: 700;
-  width: 18px; height: 18px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  border: 2px solid var(--bg);
-  opacity: 0; transform: scale(0);
-  transition: opacity 0.2s, transform 0.2s;
-}
-#chat-badge.on { opacity: 1; transform: scale(1); }
-
-/* Widget window */
-#chat-win {
-  position: fixed; bottom: 96px; right: 24px; z-index: 7999;
-  width: 360px;
-  /* Fixed height — no layout shift */
-  height: 520px;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 18px;
-  display: flex; flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 8px 48px rgba(0,0,0,0.7), 0 0 60px rgba(79,142,247,0.07);
-  /* Hidden state */
-  opacity: 0; transform: translateY(16px) scale(0.97);
-  pointer-events: none;
-  transition: opacity 0.3s cubic-bezier(0.16,1,0.3,1),
-              transform 0.3s cubic-bezier(0.16,1,0.3,1);
-}
-#chat-win.open { opacity: 1; transform: none; pointer-events: all; }
-
-/* Widget header — fixed, never moves */
-.cw-head {
-  flex-shrink: 0;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px;
-  background: rgba(79,142,247,0.04);
-}
-.cw-avatar {
-  width: 34px; height: 34px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 0 14px rgba(79,142,247,0.4);
-}
-.cw-avatar svg { width: 16px; height: 16px; fill: #fff; }
-.cw-head-info { flex: 1; min-width: 0; }
-.cw-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cw-status { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; margin-top: 1px; }
-.cw-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 5px var(--success); flex-shrink: 0; }
-.cw-x {
-  background: none; border: none; cursor: pointer;
-  color: var(--muted); padding: 4px; border-radius: 6px;
-  display: flex; align-items: center;
-  transition: color 0.2s, background 0.2s;
-  flex-shrink: 0;
-}
-.cw-x:hover { color: var(--text); background: rgba(255,255,255,0.06); }
-.cw-x svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
-
-/* Screens — take all remaining space, switch via display */
-.cw-screen {
-  flex: 1; min-height: 0;
-  display: flex; flex-direction: column;
-  overflow: hidden;
-}
-.cw-screen.hidden { display: none; }
-
-/* ── AUTH SCREEN ── */
-#cw-auth {
-  padding: 24px 20px;
-  gap: 14px;
-  justify-content: center;
-}
-.cw-auth-icon {
-  text-align: center;
-}
-.cw-auth-icon svg {
-  width: 42px; height: 42px;
-  stroke: var(--accent); fill: none; stroke-width: 1.5;
-  filter: drop-shadow(0 0 10px rgba(79,142,247,0.5));
-}
-.cw-auth-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 17px; font-weight: 600; text-align: center;
-}
-.cw-auth-desc { font-size: 12px; color: var(--muted); text-align: center; line-height: 1.55; }
-
-.cw-input {
-  width: 100%; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: 10px;
-  padding: 11px 13px; font-size: 13px; color: var(--text);
-  font-family: 'Inter', sans-serif; outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.cw-input::placeholder { color: var(--muted); }
-.cw-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,142,247,0.12); }
-
-.cw-btn {
-  width: 100%; padding: 11px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff; font-family: 'Space Grotesk', sans-serif;
-  font-size: 13px; font-weight: 600;
-  border: none; border-radius: 10px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  transition: opacity 0.2s, transform 0.15s;
-}
-.cw-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-.cw-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-
-.cw-spinner {
-  width: 14px; height: 14px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff; border-radius: 50%;
-  animation: cw-spin 0.6s linear infinite; display: none;
-}
-@keyframes cw-spin { to { transform: rotate(360deg); } }
-
-.cw-err { font-size: 11px; color: var(--danger); text-align: center; min-height: 16px; }
-.cw-hint { font-size: 11px; color: var(--muted); text-align: center; }
-.cw-back-btn {
-  background: none; border: none; cursor: pointer;
-  color: var(--muted); font-size: 11px; text-transform: uppercase;
-  letter-spacing: 0.07em; padding: 2px 5px; border-radius: 4px;
-  transition: color 0.2s; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-}
-.cw-back-btn:hover { color: var(--accent); }
-.cw-input-wrap { position: relative; }
-
-/* OTP input style */
-#cw-otp-input {
-  letter-spacing: 0.35em; font-size: 20px; text-align: center; padding-right: 55px;
-}
-
-/* ── CHAT SCREEN ── */
-#cw-chat { display: none; flex-direction: column; }
-
-.cw-msgs {
-  flex: 1; overflow-y: auto; padding: 14px;
-  display: flex; flex-direction: column; gap: 9px;
-  scrollbar-width: thin; scrollbar-color: rgba(79,142,247,0.2) transparent;
-}
-.cw-msgs::-webkit-scrollbar { width: 3px; }
-.cw-msgs::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.2); border-radius: 2px; }
-
-.cw-msg { display: flex; flex-direction: column; max-width: 80%; }
-.cw-msg.from-user { align-self: flex-end; align-items: flex-end; }
-.cw-msg.from-admin { align-self: flex-start; align-items: flex-start; }
-
-.cw-msg-sender {
-  font-size: 10px; color: var(--muted);
-  margin-bottom: 3px; display: flex; align-items: center; gap: 4px;
-}
-.cw-bot-ic {
-  width: 13px; height: 13px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-}
-.cw-bot-ic svg { width: 7px; height: 7px; fill: #fff; }
-
-.cw-bubble {
-  padding: 9px 13px; border-radius: 12px;
-  font-size: 13px; line-height: 1.5; word-break: break-word;
-}
-.cw-msg.from-user .cw-bubble {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff; border-bottom-right-radius: 4px;
-}
-.cw-msg.from-admin .cw-bubble {
-  background: var(--surface2); color: var(--text);
-  border: 1px solid var(--border); border-bottom-left-radius: 4px;
-}
-.cw-ts { font-size: 10px; color: var(--muted); margin-top: 2px; }
-
-.cw-input-row {
-  flex-shrink: 0;
-  padding: 10px;
-  border-top: 1px solid var(--border);
-  display: flex; gap: 7px; align-items: flex-end;
-}
-.cw-textarea {
-  flex: 1; background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 10px; padding: 9px 11px;
-  font-size: 13px; color: var(--text); font-family: 'Inter', sans-serif;
-  outline: none; resize: none; min-height: 38px; max-height: 90px; line-height: 1.45;
-  transition: border-color 0.2s;
-}
-.cw-textarea::placeholder { color: var(--muted); }
-.cw-textarea:focus { border-color: var(--accent); }
-.cw-send {
-  width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: opacity 0.2s, transform 0.15s;
-  box-shadow: 0 0 10px rgba(79,142,247,0.3);
-}
-.cw-send:hover { opacity: 0.9; transform: scale(1.06); }
-.cw-send svg { width: 15px; height: 15px; fill: #fff; }
+#cwin.on{opacity:1;transform:none;pointer-events:all}
+.chead{flex-shrink:0;padding:13px 15px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:10px;background:rgba(91,156,246,0.04)}
+.cav{width:33px;height:33px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 12px rgba(91,156,246,0.4)}
+.cav svg{width:15px;height:15px;fill:#fff}
+.chead-info{flex:1;min-width:0}
+.ctitle{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cstatus{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-top:1px}
+.cdot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 5px var(--ok);flex-shrink:0}
+.cx{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;border-radius:6px;display:flex;align-items:center;transition:color .2s,background .2s;flex-shrink:0}
+.cx:hover{color:var(--txt);background:rgba(255,255,255,0.06)}
+.cx svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+/* screens */
+.cscr{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.cscr.off{display:none}
+/* auth screen */
+#cauth{padding:22px 18px;gap:13px;justify-content:center}
+.cauth-icon{text-align:center}
+.cauth-icon svg{width:40px;height:40px;stroke:var(--a);fill:none;stroke-width:1.5;filter:drop-shadow(0 0 10px rgba(91,156,246,0.5))}
+.cauth-title{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;text-align:center}
+.cauth-desc{font-size:12px;color:var(--muted);text-align:center;line-height:1.55}
+.cinp{width:100%;background:var(--s2);border:1px solid var(--b);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--txt);font-family:'Inter',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s}
+.cinp::placeholder{color:var(--muted)}
+.cinp:focus{border-color:var(--a);box-shadow:0 0 0 3px rgba(91,156,246,0.12)}
+.cinp.otp{letter-spacing:.35em;font-size:1.3rem;text-align:center;font-weight:600}
+.cbtn{width:100%;padding:10px;background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .2s,transform .15s}
+.cbtn:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}
+.cbtn:disabled{opacity:.45;cursor:not-allowed}
+.cspin{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;display:none}
+.cerr{font-size:11px;color:var(--err);text-align:center;min-height:15px}
+.chint{font-size:11px;color:var(--muted);text-align:center}
+.chint button{background:none;border:none;cursor:pointer;color:var(--a);font-size:11px;font-weight:600}
+.cwrap{position:relative}
+.cback{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em;transition:color .2s}
+.cback:hover{color:var(--a)}
+/* chat screen */
+#cchat{display:none;flex-direction:column}
+.cmsgs{flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:rgba(91,156,246,0.2) transparent}
+.cmsgs::-webkit-scrollbar{width:3px}
+.cmsgs::-webkit-scrollbar-thumb{background:rgba(91,156,246,0.2);border-radius:2px}
+.cmsg{display:flex;flex-direction:column;max-width:80%}
+.cmsg.u{align-self:flex-end;align-items:flex-end}
+.cmsg.a{align-self:flex-start;align-items:flex-start}
+.csender{font-size:10px;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px}
+.cbot{width:12px;height:12px;background:linear-gradient(135deg,var(--a),var(--a2));border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+.cbot svg{width:6px;height:6px;fill:#fff}
+.cbub{padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word}
+.cmsg.u .cbub{background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;border-bottom-right-radius:4px}
+.cmsg.a .cbub{background:var(--s2);color:var(--txt);border:1px solid var(--b);border-bottom-left-radius:4px}
+.cts{font-size:10px;color:var(--muted);margin-top:2px}
+.cirow{flex-shrink:0;padding:9px;border-top:1px solid var(--b);display:flex;gap:7px;align-items:flex-end}
+.cta{flex:1;background:var(--s2);border:1px solid var(--b);border-radius:10px;padding:9px 11px;font-size:13px;color:var(--txt);font-family:'Inter',sans-serif;outline:none;resize:none;min-height:37px;max-height:85px;line-height:1.45;transition:border-color .2s}
+.cta::placeholder{color:var(--muted)}
+.cta:focus{border-color:var(--a)}
+.csend-btn{width:35px;height:35px;border-radius:9px;flex-shrink:0;background:linear-gradient(135deg,var(--a),var(--a2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .2s,transform .15s;box-shadow:0 0 10px rgba(91,156,246,0.3)}
+.csend-btn:hover{opacity:.9;transform:scale(1.06)}
+.csend-btn svg{width:14px;height:14px;fill:#fff}
 
 /* ── RESPONSIVE ── */
-@media (max-width: 600px) {
-  .nav-links, .nav-auth { display: none; }
-  .burger { display: flex; }
-  .nav-mobile { display: flex; }
-
-  .hud { width: 260px; height: 260px; }
-  section { padding: 5rem 1rem 3.5rem; }
-  .sec-sub { font-size: 0.92rem; margin-bottom: 2rem; }
-  .cards-grid { grid-template-columns: 1fr; }
-  .plans { grid-template-columns: 1fr; max-width: 100%; }
-  .support-grid { grid-template-columns: 1fr; }
-  .contact-card { padding: 1.5rem 1.1rem; }
-  .footer-links { gap: 0.9rem; }
-
-  #chat-win { width: calc(100vw - 20px); right: 10px; bottom: 88px; height: 480px; }
-  #chat-btn { bottom: 16px; right: 16px; }
+@media(max-width:640px){
+  .nav-links,.nav-right{display:none}
+  .burger{display:flex}
+  .mob-menu{display:flex}
+  .hud{width:260px;height:260px}
+  section{padding:5rem 1rem 3.5rem}
+  .sec-p{font-size:.9rem;margin-bottom:2rem}
+  .grid{grid-template-columns:1fr}
+  .plans{grid-template-columns:1fr;max-width:100%}
+  .sgrid{grid-template-columns:1fr}
+  .ccard{padding:1.5rem 1.1rem}
+  .foot-links{gap:.9rem}
+  #cwin{width:calc(100vw - 20px);right:10px;bottom:86px;height:480px}
+  #cb{bottom:16px;right:16px}
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .hud-spin, .hud-rspin { animation: none; }
-}
+@media(prefers-reduced-motion:reduce){.sp1,.sp2{animation:none}}
   </style>
 </head>
 <body>
 
-<canvas id="stars-canvas"></canvas>
+<canvas id="cv"></canvas>
 
-<!-- ═══════════════════════════════════════════
-     NAVIGATION
-═══════════════════════════════════════════ -->
+<!-- ══ NAV ══ -->
 <nav class="nav" id="nav">
   <div class="nav-inner">
     <a href="#" class="nav-logo">KiriPilot</a>
-
     <ul class="nav-links">
       <li><a href="#about"   data-s="about">О продукте</a></li>
       <li><a href="#pricing" data-s="pricing">Подписка</a></li>
       <li><a href="#support" data-s="support">Поддержка</a></li>
       <li><a href="#contact" data-s="contact">Контакты</a></li>
     </ul>
-
-    <!-- Auth buttons top-right -->
-    <div class="nav-auth">
-      <button class="btn-ghost" onclick="openAuth('login')">Войти</button>
-      <button class="btn-accent" onclick="openAuth('register')">Регистрация</button>
+    <div class="nav-right" id="nav-right">
+      <button class="btn-ghost" onclick="openModal()">Войти</button>
+      <button class="btn-pill"  onclick="openModal()">Регистрация</button>
     </div>
-
-    <button class="burger" id="burger" aria-label="Меню" onclick="toggleNav()">
-      <span></span><span></span><span></span>
-    </button>
+    <button class="burger" id="burger" onclick="toggleNav()"><span></span><span></span><span></span></button>
   </div>
-
-  <!-- Mobile menu -->
-  <div class="nav-mobile" id="nav-mobile">
+  <div class="mob-menu" id="mob-menu">
     <a href="#about"   onclick="navGo('about')">О продукте</a>
     <a href="#pricing" onclick="navGo('pricing')">Подписка</a>
     <a href="#support" onclick="navGo('support')">Поддержка</a>
     <a href="#contact" onclick="navGo('contact')">Контакты</a>
-    <div class="mob-divider"></div>
-    <div class="mob-btn-row">
-      <button class="btn-ghost" onclick="navGo(null);openAuth('login')">Войти</button>
-      <button class="btn-accent" onclick="navGo(null);openAuth('register')">Регистрация</button>
+    <div class="mob-div"></div>
+    <div class="mob-btns" id="mob-btns">
+      <button class="btn-ghost" onclick="navGo(null);openModal()">Войти / Регистрация</button>
     </div>
   </div>
 </nav>
 
-<!-- ═══════════════════════════════════════════
-     AUTH MODAL
-═══════════════════════════════════════════ -->
-<div class="modal-overlay" id="auth-overlay" onclick="handleOverlayClick(event)">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeAuth()">✕</button>
+<!-- ══ AUTH MODAL (OTP) ══ -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
     <div class="modal-logo">KiriPilot</div>
-    <div class="modal-subtitle">Личный кабинет</div>
+    <div class="modal-sub">Вход / Регистрация</div>
 
-    <div class="modal-tabs">
-      <button class="modal-tab active" id="tab-login"    onclick="switchTab('login')">Войти</button>
-      <button class="modal-tab"        id="tab-register" onclick="switchTab('register')">Регистрация</button>
+    <!-- Step 1: email -->
+    <div class="m-step" id="ms-email">
+      <div class="m-icon">
+        <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+      </div>
+      <div class="m-title">Введите ваш email</div>
+      <div class="m-desc">Пришлём 6-значный код для входа. Пароль не нужен.</div>
+      <div>
+        <span class="m-label">Email</span>
+        <input class="m-inp" id="m-email" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email"/>
+      </div>
+      <button class="m-btn" id="m-send-btn" onclick="mSendOtp()">
+        <span class="m-spin" id="m-send-spin"></span>
+        <span id="m-send-lbl">Получить код →</span>
+      </button>
+      <div class="m-err" id="m-email-err"></div>
+      <div class="m-hint">Мы не передаём email третьим лицам</div>
     </div>
 
-    <!-- Login form -->
-    <div id="form-login">
-      <div class="modal-field">
-        <label class="modal-label" for="auth-email">Email</label>
-        <input class="modal-input" id="auth-email" type="email" placeholder="you@example.com" autocomplete="email"/>
+    <!-- Step 2: OTP -->
+    <div class="m-step hidden" id="ms-otp">
+      <div class="m-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       </div>
-      <div class="modal-field">
-        <label class="modal-label" for="auth-pass">Пароль</label>
-        <input class="modal-input" id="auth-pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
-      </div>
-      <button class="modal-submit" id="login-btn" onclick="doLogin()">Войти →</button>
-      <div class="modal-error" id="auth-error"></div>
+      <div class="m-title">Введите код</div>
+      <div class="m-desc" id="m-otp-desc">Код отправлен на ваш email</div>
+      <input class="m-inp otp-style" id="m-otp" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code"/>
+      <button class="m-btn" id="m-verify-btn" onclick="mVerify()">
+        <span class="m-spin" id="m-verify-spin"></span>
+        <span id="m-verify-lbl">Войти</span>
+      </button>
+      <div class="m-err" id="m-otp-err"></div>
+      <div class="m-hint">Не пришло? <button onclick="mResend()">Отправить снова</button></div>
+      <button class="m-back" onclick="mBack()">← Изменить email</button>
     </div>
 
-    <!-- Register form -->
-    <div id="form-register" style="display:none;">
-      <div class="modal-field">
-        <label class="modal-label" for="reg-name">Имя</label>
-        <input class="modal-input" id="reg-name" type="text" placeholder="Ваше имя"/>
+    <!-- Step 3: success -->
+    <div class="m-step hidden" id="ms-ok">
+      <div class="m-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
       </div>
-      <div class="modal-field">
-        <label class="modal-label" for="reg-email">Email</label>
-        <input class="modal-input" id="reg-email" type="email" placeholder="you@example.com" autocomplete="email"/>
-      </div>
-      <div class="modal-field">
-        <label class="modal-label" for="reg-pass">Пароль</label>
-        <input class="modal-input" id="reg-pass" type="password" placeholder="Минимум 8 символов" autocomplete="new-password"/>
-      </div>
-      <button class="modal-submit" id="reg-btn" onclick="doRegister()">Создать аккаунт →</button>
-      <div class="modal-error" id="reg-error"></div>
-    </div>
-
-    <div class="modal-switch" id="modal-switch-text">
-      Ещё нет аккаунта? <button onclick="switchTab('register')">Зарегистрироваться</button>
+      <div class="m-title">Вы вошли! 👋</div>
+      <div class="m-desc" id="m-ok-desc">Добро пожаловать в KiriPilot</div>
+      <button class="m-btn" onclick="closeModal()">Закрыть</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     PAGE
-═══════════════════════════════════════════ -->
+<!-- ══ PAGE ══ -->
 <div class="page">
 
   <!-- HERO -->
   <section class="hero" id="hero">
     <div class="hud">
-      <svg class="hud-spin" viewBox="0 0 320 320" fill="none">
-        <circle cx="160" cy="160" r="145" stroke="url(#hg1)" stroke-width="1" stroke-dasharray="8 16" stroke-linecap="round"/>
-        <circle cx="160" cy="160" r="110" stroke="url(#hg1)" stroke-width="1.5" stroke-dasharray="55 28" stroke-linecap="round"/>
-        <g stroke="#4f8ef7" stroke-width="1.5" stroke-opacity="0.45">
-          <line x1="160" y1="8"   x2="160" y2="20"/>
-          <line x1="160" y1="300" x2="160" y2="312"/>
-          <line x1="8"   y1="160" x2="20"  y2="160"/>
-          <line x1="300" y1="160" x2="312" y2="160"/>
+      <svg class="sp1" viewBox="0 0 300 300" fill="none">
+        <circle cx="150" cy="150" r="135" stroke="url(#g1)" stroke-width="1" stroke-dasharray="8 16" stroke-linecap="round"/>
+        <circle cx="150" cy="150" r="102" stroke="url(#g1)" stroke-width="1.5" stroke-dasharray="50 26" stroke-linecap="round"/>
+        <g stroke="#5b9cf6" stroke-width="1.5" stroke-opacity=".4">
+          <line x1="150" y1="6"   x2="150" y2="18"/>
+          <line x1="150" y1="282" x2="150" y2="294"/>
+          <line x1="6"   y1="150" x2="18"  y2="150"/>
+          <line x1="282" y1="150" x2="294" y2="150"/>
         </g>
         <defs>
-          <linearGradient id="hg1" x1="0" y1="0" x2="320" y2="320" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#4f8ef7"/>
-            <stop offset="100%" stop-color="#a78bfa"/>
+          <linearGradient id="g1" x1="0" y1="0" x2="300" y2="300" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#5b9cf6"/>
+            <stop offset="100%" stop-color="#b08ef8"/>
           </linearGradient>
         </defs>
       </svg>
-      <svg class="hud-rspin" viewBox="0 0 320 320" fill="none">
-        <circle cx="160" cy="160" r="125" stroke="url(#hg2)" stroke-width="1.5" stroke-dasharray="38 210" stroke-linecap="round"/>
+      <svg class="sp2" viewBox="0 0 300 300" fill="none">
+        <circle cx="150" cy="150" r="118" stroke="url(#g2)" stroke-width="1.5" stroke-dasharray="36 200" stroke-linecap="round"/>
         <defs>
-          <linearGradient id="hg2" x1="0" y1="0" x2="320" y2="320" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#4f8ef7"/>
-            <stop offset="100%" stop-color="#a78bfa"/>
+          <linearGradient id="g2" x1="0" y1="0" x2="300" y2="300" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#5b9cf6"/>
+            <stop offset="100%" stop-color="#b08ef8"/>
           </linearGradient>
         </defs>
       </svg>
-      <div class="hero-card">
-        <div class="hero-logo">KiriPilot</div>
-        <div class="hero-tag">Navigate your potential</div>
-        <p class="hero-lead">Облачный ИИ-ассистент,<br/>который работает за тебя</p>
-        <a href="#about" class="hero-cta" onclick="event.preventDefault();goTo('about')">
-          Узнать больше <span class="arr">→</span>
-        </a>
+      <div class="hcard">
+        <div class="hlogo">KiriPilot</div>
+        <div class="htag">Navigate your potential</div>
+        <p class="hlead">Облачный ИИ-ассистент,<br/>который работает за тебя</p>
+        <a href="#about" class="hcta" onclick="event.preventDefault();goTo('about')">Узнать больше <span class="arr">→</span></a>
       </div>
     </div>
   </section>
 
-  <div class="divider"></div>
+  <div class="div"></div>
 
   <!-- ABOUT -->
   <section id="about">
-    <div class="sec-inner">
+    <div class="inner">
       <div class="eyebrow">О продукте</div>
-      <h2 class="sec-title">ИИ, который работает<br/>за тебя</h2>
-      <p class="sec-sub">KiriPilot — полноценный агент, который видит экран, понимает контекст и выполняет задачи. Все вычисления в облаке — твой компьютер не нагружается.</p>
-      <div class="cards-grid">
+      <h2 class="sec-h">ИИ, который работает за тебя</h2>
+      <p class="sec-p">KiriPilot — полноценный агент, который видит экран, понимает контекст и выполняет задачи. Все вычисления в облаке — твой компьютер не нагружается.</p>
+      <div class="grid">
         <div class="card"><span class="ic">☁️</span><h3>Облачная мощь</h3><p>Обработка на наших серверах. Работает быстро на любом железе.</p></div>
         <div class="card"><span class="ic">🧠</span><h3>Умное управление</h3><p>Открывает файлы, переключает задачи, вводит текст по команде.</p></div>
         <div class="card"><span class="ic">📅</span><h3>Планирование</h3><p>Составляет расписание, напоминает о дедлайнах, синхронизирует задачи.</p></div>
@@ -967,18 +517,18 @@ section {
     </div>
   </section>
 
-  <div class="divider"></div>
+  <div class="div"></div>
 
   <!-- PRICING -->
   <section id="pricing">
-    <div class="sec-inner pricing-wrap">
+    <div class="inner" style="display:flex;flex-direction:column;align-items:center">
       <div class="eyebrow">Подписка</div>
-      <h2 class="sec-title" style="text-align:center">Выбери тариф</h2>
-      <p class="sec-sub" style="text-align:center;max-width:480px">Два плана — никаких скрытых комиссий.</p>
+      <h2 class="sec-h" style="text-align:center">Выбери тариф</h2>
+      <p class="sec-p" style="text-align:center;max-width:420px">Два плана — никаких скрытых комиссий.</p>
       <div class="plans">
         <div class="plan">
           <div class="plan-name">PRO</div>
-          <div class="plan-desc">Всё необходимое для работы и автоматизации задач.</div>
+          <div class="plan-desc">Всё для работы и автоматизации задач.</div>
           <div class="plan-price"><span class="amt">1 500 ₽</span><span class="per">/ мес</span></div>
           <ul class="plan-feats">
             <li><span class="ck">✓</span>Управление рабочим столом</li>
@@ -987,583 +537,425 @@ section {
             <li><span class="ck">✓</span>Работа с браузером</li>
             <li><span class="ck">✓</span>Поддержка в чате</li>
           </ul>
-          <button class="plan-btn" onclick="showToast('Скоро! 🚀')">Подключить PRO</button>
+          <button class="plan-btn" onclick="toast('Скоро! 🚀')">Подключить PRO</button>
         </div>
         <div class="plan hot">
           <div class="plan-badge">✦ Максимум</div>
           <div class="plan-name">MAX</div>
-          <div class="plan-desc">Максимальная скорость, приоритет и расширенные функции.</div>
+          <div class="plan-desc">Максимум скорости и расширенные функции.</div>
           <div class="plan-price"><span class="amt">2 500 ₽</span><span class="per">/ мес</span></div>
           <ul class="plan-feats">
-            <li><span class="ck">✓</span>Всё из плана PRO</li>
+            <li><span class="ck">✓</span>Всё из PRO</li>
             <li><span class="ck">✓</span>Приоритетная поддержка 24/7</li>
             <li><span class="ck">✓</span>Ранний доступ к функциям</li>
             <li><span class="ck">✓</span>Расширенная автоматизация</li>
             <li><span class="ck">✓</span>API-доступ</li>
           </ul>
-          <button class="plan-btn" onclick="showToast('Скоро! ✦')">Подключить MAX</button>
+          <button class="plan-btn" onclick="toast('Скоро! ✦')">Подключить MAX</button>
         </div>
       </div>
-      <p class="pricing-note">Оплата ежемесячно. Отмена в любой момент из личного кабинета.</p>
+      <p class="plan-note">Оплата ежемесячно. Отмена в любой момент.</p>
     </div>
   </section>
 
-  <div class="divider"></div>
+  <div class="div"></div>
 
   <!-- SUPPORT -->
   <section id="support">
-    <div class="sec-inner">
+    <div class="inner">
       <div class="eyebrow">Поддержка</div>
-      <h2 class="sec-title">Мы на связи</h2>
-      <p class="sec-sub">Выбери удобный канал — ответим быстро.</p>
-      <div class="support-grid">
-        <div class="sup-card"><span class="si">💬</span><h3>Чат поддержки</h3><p>Ответим в течение нескольких минут. MAX — приоритет 24/7.</p><button class="sup-link" onclick="openChatWidget()">Написать в чат →</button></div>
-        <div class="sup-card"><span class="si">✉️</span><h3>Email</h3><p>Для сложных вопросов. Отвечаем в течение 24 часов.</p><a href="mailto:KiriSupport@proton.me" class="sup-link">KiriSupport@proton.me →</a></div>
-        <div class="sup-card"><span class="si">📖</span><h3>База знаний</h3><p>Гайды и ответы на частые вопросы. Большинство проблем за 2 мин.</p><button class="sup-link" onclick="showToast('Документация в разработке 📖')">Открыть →</button></div>
-        <div class="sup-card"><span class="si">🐛</span><h3>Сообщить об ошибке</h3><p>Нашёл баг? Расскажи — мы фиксируем все обращения.</p><button class="sup-link" onclick="goTo('contact')">Отправить отчёт →</button></div>
+      <h2 class="sec-h">Мы на связи</h2>
+      <p class="sec-p">Выбери удобный канал — ответим быстро.</p>
+      <div class="sgrid">
+        <div class="scard"><span class="si">💬</span><h3>Чат поддержки</h3><p>Ответим в течение нескольких минут. MAX — приоритет 24/7.</p><button class="slink" onclick="openChat()">Написать в чат →</button></div>
+        <div class="scard"><span class="si">✉️</span><h3>Email</h3><p>Для сложных вопросов. Отвечаем в течение 24 часов.</p><a href="mailto:KiriSupport@proton.me" class="slink">KiriSupport@proton.me →</a></div>
+        <div class="scard"><span class="si">📖</span><h3>База знаний</h3><p>Гайды и ответы на частые вопросы. Большинство проблем за 2 мин.</p><button class="slink" onclick="toast('Документация в разработке 📖')">Открыть →</button></div>
+        <div class="scard"><span class="si">🐛</span><h3>Сообщить об ошибке</h3><p>Нашёл баг? Расскажи — фиксируем все обращения.</p><button class="slink" onclick="goTo('contact')">Отправить отчёт →</button></div>
       </div>
-
-      <div style="margin-top:3rem;">
-        <div class="eyebrow" style="margin-bottom:0.9rem">Частые вопросы</div>
+      <div style="margin-top:2.8rem">
+        <div class="eyebrow" style="margin-bottom:.85rem">Частые вопросы</div>
         <div class="faq">
-          <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">Как KiriPilot управляет моим ПК? <span class="ch">▾</span></button><div class="faq-a">Лёгкий клиент транслирует экран, вся обработка — на наших серверах. Твой ПК почти не нагружается.</div></div>
-          <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">Мои данные в безопасности? <span class="ch">▾</span></button><div class="faq-a">Передача защищена шифрованием. Скриншоты не хранятся, данные не передаются третьим лицам.</div></div>
-          <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">Какие ОС поддерживаются? <span class="ch">▾</span></button><div class="faq-a">Первый релиз — Windows 10/11. macOS и Linux запланированы в следующих обновлениях.</div></div>
-          <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">Можно отменить подписку? <span class="ch">▾</span></button><div class="faq-a">Да, в любой момент в настройках аккаунта. Доступ сохраняется до конца оплаченного периода.</div></div>
+          <div class="fitem"><button class="fq" onclick="faq(this)">Как KiriPilot управляет моим ПК? <span class="ch">▾</span></button><div class="fa">Лёгкий клиент транслирует экран, вся обработка — на наших серверах. Твой ПК почти не нагружается.</div></div>
+          <div class="fitem"><button class="fq" onclick="faq(this)">Мои данные в безопасности? <span class="ch">▾</span></button><div class="fa">Передача защищена шифрованием. Скриншоты не хранятся, данные не передаются третьим лицам.</div></div>
+          <div class="fitem"><button class="fq" onclick="faq(this)">Какие ОС поддерживаются? <span class="ch">▾</span></button><div class="fa">Первый релиз — Windows 10/11. macOS и Linux запланированы в следующих обновлениях.</div></div>
+          <div class="fitem"><button class="fq" onclick="faq(this)">Можно отменить подписку? <span class="ch">▾</span></button><div class="fa">Да, в любой момент в настройках аккаунта. Доступ сохраняется до конца оплаченного периода.</div></div>
         </div>
       </div>
     </div>
   </section>
 
-  <div class="divider"></div>
+  <div class="div"></div>
 
   <!-- CONTACT -->
   <section id="contact">
-    <div class="sec-inner" style="display:flex;flex-direction:column;align-items:center">
+    <div class="inner" style="display:flex;flex-direction:column;align-items:center">
       <div class="eyebrow">Связаться</div>
-      <h2 class="sec-title" style="text-align:center">Есть вопрос?</h2>
-      <p class="sec-sub" style="text-align:center">Оставь сообщение — ответим в течение рабочего дня.</p>
-      <div class="contact-card">
-        <div class="form-row"><label for="cf-name">Имя</label><input id="cf-name" type="text" placeholder="Как тебя зовут?"/></div>
-        <div class="form-row"><label for="cf-email">Email</label><input id="cf-email" type="email" placeholder="your@email.com"/></div>
-        <div class="form-row"><label for="cf-topic">Тема</label>
-          <select id="cf-topic"><option value="">Выбери тему…</option><option>Общий вопрос</option><option>Подписка и оплата</option><option>Техническая проблема</option><option>Партнёрство</option><option>Отзыв</option></select></div>
-        <div class="form-row"><label for="cf-msg">Сообщение</label><textarea id="cf-msg" placeholder="Расскажи подробнее…"></textarea></div>
-        <button class="form-send" onclick="submitContact()">Отправить ✦</button>
-        <div class="form-ok" id="form-ok">✅ Получили! Ответим скоро.</div>
+      <h2 class="sec-h" style="text-align:center">Есть вопрос?</h2>
+      <p class="sec-p" style="text-align:center">Оставь сообщение — ответим в течение рабочего дня.</p>
+      <div class="ccard">
+        <div class="crow"><label>Имя</label><input id="cf-n" type="text" placeholder="Как тебя зовут?"/></div>
+        <div class="crow"><label>Email</label><input id="cf-e" type="email" placeholder="your@email.com"/></div>
+        <div class="crow"><label>Тема</label><select id="cf-t"><option value="">Выбери тему…</option><option>Общий вопрос</option><option>Подписка и оплата</option><option>Техническая проблема</option><option>Партнёрство</option><option>Отзыв</option></select></div>
+        <div class="crow"><label>Сообщение</label><textarea id="cf-m" placeholder="Расскажи подробнее…"></textarea></div>
+        <button class="csend" onclick="sendContact()">Отправить ✦</button>
+        <div class="cok" id="cok">✅ Получили! Ответим скоро.</div>
       </div>
     </div>
   </section>
 
-  <footer class="footer">
-    <div class="footer-logo">KiriPilot</div>
-    <nav class="footer-links">
+  <footer class="foot">
+    <div class="foot-logo">KiriPilot</div>
+    <nav class="foot-links">
       <a href="#about"   onclick="goTo('about')">О продукте</a>
       <a href="#pricing" onclick="goTo('pricing')">Подписка</a>
       <a href="#support" onclick="goTo('support')">Поддержка</a>
       <a href="#contact" onclick="goTo('contact')">Контакты</a>
       <a href="mailto:KiriSupport@proton.me">Email</a>
     </nav>
-    <div class="footer-copy">© 2025 KiriPilot — Coming Soon</div>
+    <div class="foot-copy">© 2025 KiriPilot — Coming Soon</div>
   </footer>
+</div>
 
-</div><!-- /page -->
-
-<!-- Toast -->
 <div id="toast"></div>
 
-<!-- ═══════════════════════════════════════════
-     CHAT WIDGET
-═══════════════════════════════════════════ -->
-<button id="chat-btn" aria-label="Чат поддержки" onclick="toggleChat()">
-  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
-  <span id="chat-badge"></span>
+<!-- ══ CHAT WIDGET ══ -->
+<button id="cb" onclick="toggleChat()">
+  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+  <span id="cbadge"></span>
 </button>
 
-<div id="chat-win" role="dialog" aria-label="Чат поддержки">
-
-  <!-- Header — always visible -->
-  <div class="cw-head">
-    <div class="cw-avatar">
-      <svg viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3V3h-2v2H9V3H7v2H4c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9h-2zm0 11H4V7h16v13zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>
+<div id="cwin">
+  <div class="chead">
+    <div class="cav"><svg viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3V3h-2v2H9V3H7v2H4c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9h-2zm0 11H4V7h16v13z"/></svg></div>
+    <div class="chead-info">
+      <div class="ctitle">Поддержка KiriPilot</div>
+      <div class="cstatus"><span class="cdot"></span>Онлайн · отвечаем за 5 мин</div>
     </div>
-    <div class="cw-head-info">
-      <div class="cw-title">Поддержка KiriPilot</div>
-      <div class="cw-status"><span class="cw-dot"></span>Онлайн · отвечаем за 5 мин</div>
-    </div>
-    <button class="cw-x" onclick="toggleChat()" aria-label="Закрыть">
-      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
+    <button class="cx" onclick="toggleChat()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
 
-  <!-- AUTH SCREEN -->
-  <div class="cw-screen" id="cw-auth">
-
-    <!-- Step 1: email -->
-    <div id="cw-step-email">
-      <div class="cw-auth-icon">
-        <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
-      </div>
-      <div class="cw-auth-title">Начать чат</div>
-      <div class="cw-auth-desc">Введите email — пришлём 6-значный код</div>
-      <input class="cw-input" id="cw-email-inp" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email"/>
-      <button class="cw-btn" id="cw-otp-btn" onclick="cwRequestOtp()">
-        <span class="cw-spinner" id="cw-email-spin"></span>
-        <span id="cw-otp-lbl">Получить код →</span>
+  <!-- Auth -->
+  <div class="cscr" id="cauth">
+    <div id="cs-email">
+      <div class="cauth-icon"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></div>
+      <div class="cauth-title">Начать чат</div>
+      <div class="cauth-desc">Введите email — пришлём 6-значный код</div>
+      <input class="cinp" id="c-email" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email"/>
+      <button class="cbtn" id="c-otp-btn" onclick="cReqOtp()">
+        <span class="cspin" id="c-espin"></span>
+        <span id="c-elbl">Получить код →</span>
       </button>
-      <div class="cw-err" id="cw-email-err"></div>
-      <div class="cw-hint">Мы не передаём email третьим лицам</div>
+      <div class="cerr" id="c-eerr"></div>
+      <div class="chint">Мы не передаём email третьим лицам</div>
     </div>
-
-    <!-- Step 2: OTP -->
-    <div id="cw-step-otp" style="display:none;">
-      <div class="cw-auth-icon">
-        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <div id="cs-otp" style="display:none">
+      <div class="cauth-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+      <div class="cauth-title">Введите код</div>
+      <div class="cauth-desc" id="c-odesc">Код отправлен на ваш email</div>
+      <div class="cwrap">
+        <input class="cinp otp" id="c-otp" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code"/>
+        <button class="cback" onclick="cBack()">Назад</button>
       </div>
-      <div class="cw-auth-title">Введите код</div>
-      <div class="cw-auth-desc" id="cw-otp-desc">Код отправлен на ваш email</div>
-      <div class="cw-input-wrap">
-        <input class="cw-input" id="cw-otp-input" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code"/>
-        <button class="cw-back-btn" onclick="cwBack()">Назад</button>
-      </div>
-      <button class="cw-btn" id="cw-verify-btn" onclick="cwVerifyOtp()">
-        <span class="cw-spinner" id="cw-otp-spin"></span>
-        <span id="cw-verify-lbl">Подтвердить</span>
+      <button class="cbtn" id="c-vbtn" onclick="cVerify()">
+        <span class="cspin" id="c-vspin"></span>
+        <span id="c-vlbl">Подтвердить</span>
       </button>
-      <div class="cw-err" id="cw-otp-err"></div>
-      <div class="cw-hint">Не пришло? <button onclick="cwResend()" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:11px;font-weight:600;">Отправить ещё раз</button></div>
-    </div>
-
-  </div><!-- /cw-auth -->
-
-  <!-- CHAT SCREEN -->
-  <div class="cw-screen hidden" id="cw-chat">
-    <div class="cw-msgs" id="cw-msgs">
-      <!-- Welcome message -->
-      <div class="cw-msg from-admin">
-        <div class="cw-msg-sender"><span class="cw-bot-ic"><svg viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3V3h-2v2H9V3H7v2H4c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9h-2z"/></svg></span>Поддержка KiriPilot</div>
-        <div class="cw-bubble">👋 Привет! Опишите вопрос — ответим как можно скорее.</div>
-        <div class="cw-ts" id="cw-welcome-ts"></div>
-      </div>
-    </div>
-    <div class="cw-input-row">
-      <textarea class="cw-textarea" id="cw-msg-inp" placeholder="Напишите сообщение…" rows="1"></textarea>
-      <button class="cw-send" onclick="cwSend()" aria-label="Отправить">
-        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-      </button>
+      <div class="cerr" id="c-oerr"></div>
+      <div class="chint">Не пришло? <button onclick="cResend()">Отправить снова</button></div>
     </div>
   </div>
 
-</div><!-- /chat-win -->
+  <!-- Chat -->
+  <div class="cscr off" id="cchat">
+    <div class="cmsgs" id="cmsgs">
+      <div class="cmsg a">
+        <div class="csender"><span class="cbot"><svg viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3V3h-2v2H9V3H7v2H4c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9h-2z"/></svg></span>Поддержка KiriPilot</div>
+        <div class="cbub">👋 Привет! Опишите вопрос — ответим как можно скорее.</div>
+        <div class="cts" id="c-wts"></div>
+      </div>
+    </div>
+    <div class="cirow">
+      <textarea class="cta" id="c-inp" placeholder="Напишите сообщение…" rows="1"></textarea>
+      <button class="csend-btn" onclick="cSend()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+    </div>
+  </div>
+</div>
 
-<!-- ═══════════════════════════════════════════
-     SCRIPTS
-═══════════════════════════════════════════ -->
-<!-- Replace this URL with your actual backend after deploy -->
 <script src="https://kiripilot.onrender.com/socket.io/socket.io.js"></script>
-
-<script type="module">
+<script>
 'use strict';
 
-/* ── Starfield ── */
-(function(){
-  const c = document.getElementById('stars-canvas');
-  const ctx = c.getContext('2d');
-  let stars = [];
-  function resize(){ c.width = innerWidth; c.height = innerHeight; }
-  function init(){
-    stars = [];
-    for(let i=0;i<180;i++) stars.push({
-      x: Math.random()*c.width, y: Math.random()*c.height,
-      r: Math.random()*1.3+0.3,
-      a: Math.random(), da: (Math.random()*0.004+0.001)*(Math.random()<0.5?1:-1),
-      vx:(Math.random()-0.5)*0.06, vy:(Math.random()-0.5)*0.06
-    });
-  }
-  function draw(){
-    ctx.clearRect(0,0,c.width,c.height);
-    for(const s of stars){
-      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(167,139,250,${Math.max(0,Math.min(1,s.a))})`; ctx.fill();
-      s.a+=s.da; if(s.a>1||s.a<0)s.da*=-1;
-      s.x+=s.vx; s.y+=s.vy;
-      if(s.x<0)s.x=c.width; if(s.x>c.width)s.x=0;
-      if(s.y<0)s.y=c.height; if(s.y>c.height)s.y=0;
-    }
-    requestAnimationFrame(draw);
-  }
-  addEventListener('resize',()=>{resize();init();});
-  resize(); init(); draw();
+/* ── Stars ── */
+(()=>{
+  const c=document.getElementById('cv'),x=c.getContext('2d');
+  let s=[];
+  const rs=()=>{c.width=innerWidth;c.height=innerHeight};
+  const is=()=>{s=[];for(let i=0;i<180;i++)s.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.3+0.3,a:Math.random(),da:(Math.random()*.004+.001)*(Math.random()<.5?1:-1),vx:(Math.random()-.5)*.06,vy:(Math.random()-.5)*.06})};
+  const dr=()=>{x.clearRect(0,0,c.width,c.height);for(const t of s){x.beginPath();x.arc(t.x,t.y,t.r,0,Math.PI*2);x.fillStyle=`rgba(167,139,250,${Math.max(0,Math.min(1,t.a))})`;x.fill();t.a+=t.da;if(t.a>1||t.a<0)t.da*=-1;t.x+=t.vx;t.y+=t.vy;if(t.x<0)t.x=c.width;if(t.x>c.width)t.x=0;if(t.y<0)t.y=c.height;if(t.y>c.height)t.y=0}requestAnimationFrame(dr)};
+  addEventListener('resize',()=>{rs();is()});rs();is();dr();
 })();
 
 /* ── Nav ── */
-function toggleNav(){
-  document.getElementById('nav').classList.toggle('open');
-}
-function navGo(id){
-  document.getElementById('nav').classList.remove('open');
-  if(id) setTimeout(()=>goTo(id),260);
-}
-function goTo(id){
-  const el=document.getElementById(id);
-  if(el) el.scrollIntoView({behavior:'smooth'});
-}
-
-/* Nav active link on scroll */
-(function(){
+function toggleNav(){document.getElementById('nav').classList.toggle('open')}
+function navGo(id){document.getElementById('nav').classList.remove('open');if(id)setTimeout(()=>goTo(id),260)}
+function goTo(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'})}
+(()=>{
   const ids=['about','pricing','support','contact'];
-  const links=document.querySelectorAll('.nav-links [data-s]');
-  const obs=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting) links.forEach(l=>l.classList.toggle('active',l.dataset.s===e.target.id));
-    });
-  },{rootMargin:'-40% 0px -55% 0px'});
-  ids.forEach(id=>{const el=document.getElementById(id);if(el)obs.observe(el);});
+  const ls=document.querySelectorAll('.nav-links [data-s]');
+  const o=new IntersectionObserver(en=>{en.forEach(e=>{if(e.isIntersecting)ls.forEach(l=>l.classList.toggle('act',l.dataset.s===e.target.id))})},{rootMargin:'-40% 0px -55% 0px'});
+  ids.forEach(id=>{const el=document.getElementById(id);if(el)o.observe(el)});
 })();
-
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    document.getElementById('nav').classList.remove('open');
-    closeAuth();
-  }
-});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElementById('nav').classList.remove('open');closeModal()}});
 
 /* ── Toast ── */
-let _toastT;
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  clearTimeout(_toastT); _toastT=setTimeout(()=>t.classList.remove('show'),3000);
-}
+let _tt;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('on'),3000)}
 
 /* ── FAQ ── */
-function faqToggle(btn){
-  const item=btn.parentElement, open=item.classList.contains('open');
-  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
-  if(!open) item.classList.add('open');
+function faq(b){const i=b.parentElement,o=i.classList.contains('open');document.querySelectorAll('.fitem.open').forEach(x=>x.classList.remove('open'));if(!o)i.classList.add('open')}
+
+/* ── Contact ── */
+function sendContact(){
+  const n=document.getElementById('cf-n').value.trim(),e=document.getElementById('cf-e').value.trim(),t=document.getElementById('cf-t').value,m=document.getElementById('cf-m').value.trim();
+  if(!n||!e||!t||!m){toast('Заполни все поля 📝');return}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){toast('Проверь email');return}
+  document.querySelector('.csend').style.display='none';
+  document.getElementById('cok').style.display='block';
+  toast('Отправлено! ✅');
 }
 
-/* ── Contact form ── */
-function submitContact(){
-  const n=document.getElementById('cf-name').value.trim(),
-        e=document.getElementById('cf-email').value.trim(),
-        t=document.getElementById('cf-topic').value,
-        m=document.getElementById('cf-msg').value.trim();
-  if(!n||!e||!t||!m){showToast('Заполни все поля 📝');return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){showToast('Проверь email');return;}
-  document.querySelector('.form-send').style.display='none';
-  document.getElementById('form-ok').style.display='block';
-  showToast('Отправлено! ✅');
+/* ══════════════════════════════
+   AUTH MODAL (OTP через сервер)
+══════════════════════════════ */
+const M={email:null,sessionId:localStorage.getItem('kiri_sid')||null};
+
+function openModal(){
+  if(M.sessionId){toast('Вы уже вошли 👋');return}
+  mShowStep('email');
+  document.getElementById('overlay').classList.add('on');
+  setTimeout(()=>document.getElementById('m-email').focus(),300);
+}
+function closeModal(){document.getElementById('overlay').classList.remove('on')}
+function overlayClick(e){if(e.target===document.getElementById('overlay'))closeModal()}
+
+function mShowStep(s){
+  ['email','otp','ok'].forEach(n=>document.getElementById('ms-'+n).classList.toggle('hidden',n!==s));
 }
 
-/* ══════════════════════════════════════
-   FIREBASE AUTH
-══════════════════════════════════════ */
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-         sendEmailVerification, updateProfile, onAuthStateChanged, signOut }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+async function mSendOtp(){
+  const email=document.getElementById('m-email').value.trim();
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){document.getElementById('m-email-err').textContent='Введите корректный email';return}
+  M.email=email.toLowerCase();
+  document.getElementById('m-email-err').textContent='';
+  document.getElementById('m-send-spin').style.display='block';
+  document.getElementById('m-send-lbl').textContent='Отправляем…';
+  document.getElementById('m-send-btn').disabled=true;
+  if(W.socket)W.socket.emit('auth:request-otp',{email:M.email});
+  else{mSetEmailLoad(false);document.getElementById('m-email-err').textContent='Нет соединения с сервером'}
+}
+function mSetEmailLoad(on){
+  document.getElementById('m-send-spin').style.display=on?'block':'none';
+  document.getElementById('m-send-lbl').textContent=on?'Отправляем…':'Получить код →';
+  document.getElementById('m-send-btn').disabled=on;
+}
 
-const firebaseConfig = {
-  apiKey:            "AIzaSyCNy7CKL9ymJtX-wbeDhjNddLtmukjFgJ4",
-  authDomain:        "kiripilot-15622.firebaseapp.com",
-  projectId:         "kiripilot-15622",
-  storageBucket:     "kiripilot-15622.firebasestorage.app",
-  messagingSenderId: "1067841950245",
-  appId:             "1:1067841950245:web:13a5500820db1bc6f465cc",
-  measurementId:     "G-J3W461Y9YB"
-};
+function mVerify(){
+  const code=document.getElementById('m-otp').value.trim();
+  if(code.length<6){document.getElementById('m-otp-err').textContent='Введите 6-значный код';return}
+  document.getElementById('m-otp-err').textContent='';
+  document.getElementById('m-verify-spin').style.display='block';
+  document.getElementById('m-verify-lbl').textContent='Проверяем…';
+  document.getElementById('m-verify-btn').disabled=true;
+  if(W.socket)W.socket.emit('auth:verify-otp',{email:M.email,code});
+}
+function mBack(){mShowStep('email');document.getElementById('m-email-err').textContent=''}
+function mResend(){
+  document.getElementById('m-otp-err').textContent='Новый код отправлен ✓';
+  document.getElementById('m-otp-err').style.color='var(--ok)';
+  document.getElementById('m-otp').value='';
+  if(W.socket)W.socket.emit('auth:request-otp',{email:M.email});
+  setTimeout(()=>{document.getElementById('m-otp-err').textContent='';document.getElementById('m-otp-err').style.color=''},3000);
+}
 
-const fbApp  = initializeApp(firebaseConfig);
-const fbAuth = getAuth(fbApp);
+function onModalOtpSent(){
+  mSetEmailLoad(false);
+  document.getElementById('m-otp-desc').textContent='Код отправлен на '+M.email;
+  mShowStep('otp');
+  setTimeout(()=>document.getElementById('m-otp').focus(),200);
+}
+function onModalSuccess(sid){
+  document.getElementById('m-verify-spin').style.display='none';
+  document.getElementById('m-verify-lbl').textContent='Войти';
+  document.getElementById('m-verify-btn').disabled=false;
+  M.sessionId=sid;
+  localStorage.setItem('kiri_sid',sid);
+  localStorage.setItem('kiri_email',M.email);
+  document.getElementById('m-ok-desc').textContent='Добро пожаловать, '+M.email;
+  mShowStep('ok');
+  updateNavUser(true);
+  toast('Вы вошли! 👋');
+}
+function onModalError(msg){
+  mSetEmailLoad(false);
+  document.getElementById('m-verify-spin').style.display='none';
+  document.getElementById('m-verify-lbl').textContent='Войти';
+  document.getElementById('m-verify-btn').disabled=false;
+  const emailStep=!document.getElementById('ms-email').classList.contains('hidden');
+  if(emailStep)document.getElementById('m-email-err').textContent=msg;
+  else document.getElementById('m-otp-err').textContent=msg;
+}
 
-// Track auth state → update nav buttons
-onAuthStateChanged(fbAuth, user => {
-  const authEl = document.querySelector('.nav-auth');
-  const mobRow  = document.querySelector('.mob-btn-row');
-  if (user) {
-    const name = user.displayName || user.email.split('@')[0];
-    authEl.innerHTML = `
-      <span style="font-size:0.82rem;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
-      <button class="btn-ghost" onclick="doSignOut()">Выйти</button>`;
-    mobRow.innerHTML = `<button class="btn-ghost" style="flex:1" onclick="doSignOut()">Выйти (${name})</button>`;
+function updateNavUser(loggedIn){
+  const nr=document.getElementById('nav-right');
+  const mb=document.getElementById('mob-btns');
+  const email=localStorage.getItem('kiri_email')||'';
+  const name=email.split('@')[0];
+  if(loggedIn){
+    nr.innerHTML=`<div class="nav-user"><span class="nav-user-dot"></span><span class="nav-user-name">${name}</span></div><button class="btn-ghost" onclick="doLogout()">Выйти</button>`;
+    mb.innerHTML=`<button class="btn-ghost" style="flex:1" onclick="doLogout()">Выйти (${name})</button>`;
   } else {
-    authEl.innerHTML = `
-      <button class="btn-ghost"   onclick="openAuth('login')">Войти</button>
-      <button class="btn-accent"  onclick="openAuth('register')">Регистрация</button>`;
-    mobRow.innerHTML = `
-      <button class="btn-ghost"  onclick="navGo(null);openAuth('login')">Войти</button>
-      <button class="btn-accent" onclick="navGo(null);openAuth('register')">Регистрация</button>`;
-  }
-});
-
-async function doSignOut(){
-  await signOut(fbAuth);
-  showToast('Вы вышли из аккаунта');
-}
-
-/* ── Auth modal ── */
-function openAuth(tab){
-  switchTab(tab||'login');
-  document.getElementById('auth-overlay').classList.add('show');
-}
-function closeAuth(){
-  document.getElementById('auth-overlay').classList.remove('show');
-}
-function handleOverlayClick(e){
-  if(e.target===document.getElementById('auth-overlay')) closeAuth();
-}
-function switchTab(t){
-  document.getElementById('tab-login').classList.toggle('active',t==='login');
-  document.getElementById('tab-register').classList.toggle('active',t==='register');
-  document.getElementById('form-login').style.display    = t==='login'    ? '' : 'none';
-  document.getElementById('form-register').style.display = t==='register' ? '' : 'none';
-  document.getElementById('modal-switch-text').innerHTML = t==='login'
-    ? 'Ещё нет аккаунта? <button onclick="switchTab(\'register\')">Зарегистрироваться</button>'
-    : 'Уже есть аккаунт? <button onclick="switchTab(\'login\')">Войти</button>';
-  document.getElementById('auth-error').textContent='';
-  document.getElementById('reg-error').textContent='';
-}
-
-async function doLogin(){
-  const email = document.getElementById('auth-email').value.trim();
-  const pass  = document.getElementById('auth-pass').value;
-  const btn   = document.getElementById('login-btn');
-  const err   = document.getElementById('auth-error');
-  if(!email||!pass){err.textContent='Заполни все поля';return;}
-  btn.disabled=true; btn.textContent='Входим…'; err.textContent='';
-  try {
-    await signInWithEmailAndPassword(fbAuth, email, pass);
-    showToast('Добро пожаловать! 👋');
-    closeAuth();
-  } catch(e) {
-    err.textContent = fbErrMsg(e.code);
-  } finally {
-    btn.disabled=false; btn.textContent='Войти →';
+    nr.innerHTML=`<button class="btn-ghost" onclick="openModal()">Войти</button><button class="btn-pill" onclick="openModal()">Регистрация</button>`;
+    mb.innerHTML=`<button class="btn-ghost" onclick="navGo(null);openModal()">Войти / Регистрация</button>`;
   }
 }
-
-async function doRegister(){
-  const name  = document.getElementById('reg-name').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const pass  = document.getElementById('reg-pass').value;
-  const btn   = document.getElementById('reg-btn');
-  const err   = document.getElementById('reg-error');
-  if(!name||!email||!pass){err.textContent='Заполни все поля';return;}
-  if(pass.length<8){err.textContent='Пароль минимум 8 символов';return;}
-  btn.disabled=true; btn.textContent='Создаём…'; err.textContent='';
-  try {
-    const cred = await createUserWithEmailAndPassword(fbAuth, email, pass);
-    await updateProfile(cred.user, { displayName: name });
-    await sendEmailVerification(cred.user);
-    showToast('Аккаунт создан! Проверь email для подтверждения ✉️');
-    closeAuth();
-  } catch(e) {
-    err.textContent = fbErrMsg(e.code);
-  } finally {
-    btn.disabled=false; btn.textContent='Создать аккаунт →';
-  }
+function doLogout(){
+  M.sessionId=null;M.email=null;
+  localStorage.removeItem('kiri_sid');localStorage.removeItem('kiri_email');
+  updateNavUser(false);toast('Вы вышли из аккаунта');
 }
 
-function fbErrMsg(code){
-  const map = {
-    'auth/email-already-in-use':    'Этот email уже зарегистрирован',
-    'auth/invalid-email':           'Некорректный email',
-    'auth/weak-password':           'Пароль слишком простой',
-    'auth/user-not-found':          'Пользователь не найден',
-    'auth/wrong-password':          'Неверный пароль',
-    'auth/invalid-credential':      'Неверный email или пароль',
-    'auth/too-many-requests':       'Слишком много попыток. Подожди немного',
-    'auth/network-request-failed':  'Ошибка сети. Проверь интернет',
-  };
-  return map[code] || 'Ошибка: ' + code;
-}
+// Restore session on page load
+if(M.sessionId){updateNavUser(true)}
 
-/* ════════════════════════════════════════
+/* ══════════════════════════════
    CHAT WIDGET
-════════════════════════════════════════ */
-const BACKEND = 'https://kiripilot.onrender.com'; // ← замени после деплоя
+══════════════════════════════ */
+const W={open:false,email:localStorage.getItem('kiri_email')||null,sessionId:M.sessionId,unread:0,socket:null};
 
-const cw = {
-  open:      false,
-  email:     localStorage.getItem('kiri_email') || null,
-  sessionId: localStorage.getItem('kiri_session') || null,
-  unread:    0,
-  socket:    null,
-};
+function connect(){
+  if(W.socket)return;
+  try{
+    W.socket=io('https://kiripilot.onrender.com',{transports:['websocket']});
 
-/* Connect socket only when widget is opened for the first time */
-function cwConnect(){
-  if(cw.socket) return;
-  try {
-    cw.socket = io(BACKEND, { transports:['websocket'] });
-    cw.socket.on('auth:otp-sent',  ()=>{ cwSetEmailLoading(false); cwShowStep('otp'); });
-    cw.socket.on('auth:success',   ({sessionId,history})=>{ cwOnAuthSuccess(sessionId,history); });
-    cw.socket.on('auth:error',     ({message})=>{ cwOnAuthError(message); });
-    cw.socket.on('chat:message',   (msg)=>{ cwOnMessage(msg); });
-  } catch(e){ console.warn('[Chat] No backend'); }
+    W.socket.on('auth:otp-sent',()=>{
+      mSetEmailLoad(false);
+      onModalOtpSent();
+      // also handle chat widget otp step
+      cSetEmailLoad(false);
+      document.getElementById('c-odesc').textContent='Код отправлен на '+W.email;
+      cShowStep('otp');
+    });
+
+    W.socket.on('auth:success',({sessionId,history})=>{
+      // modal success
+      if(!M.sessionId)onModalSuccess(sessionId);
+      // chat success
+      W.sessionId=sessionId;M.sessionId=sessionId;
+      localStorage.setItem('kiri_sid',sessionId);
+      if(history?.length){history.forEach(m=>cAppend(m,false));cScrollBot()}
+      cShowScreen('chat');
+      document.getElementById('c-wts').textContent=fmt(Date.now());
+      document.getElementById('c-inp').focus();
+    });
+
+    W.socket.on('auth:error',({message})=>{
+      onModalError(message);
+      cSetEmailLoad(false);
+      document.getElementById('c-vspin').style.display='none';
+      document.getElementById('c-vlbl').textContent='Подтвердить';
+      document.getElementById('c-vbtn').disabled=false;
+      document.getElementById('c-oerr').textContent=message;
+    });
+
+    W.socket.on('chat:message',msg=>{
+      cAppend(msg,true);
+      if(!W.open&&msg.from==='admin'){W.unread++;const b=document.getElementById('cbadge');b.textContent=W.unread;b.classList.add('on')}
+    });
+  }catch(e){console.warn('No backend')}
 }
 
-function openChatWidget(){ if(!cw.open) toggleChat(); }
-
+function openChat(){if(!W.open)toggleChat()}
 function toggleChat(){
-  const win=document.getElementById('chat-win');
-  cw.open=!cw.open;
-  win.classList.toggle('open', cw.open);
-  document.getElementById('chat-btn').style.transform = cw.open ? 'scale(0.9)' : '';
-
-  if(cw.open){
-    cwConnect();
-    cw.unread=0;
-    document.getElementById('chat-badge').classList.remove('on');
-    document.getElementById('cw-welcome-ts').textContent = cwFmtTime(Date.now());
-    if(cw.sessionId) cwShowScreen('chat'); else cwShowStep('email');
+  W.open=!W.open;
+  document.getElementById('cwin').classList.toggle('on',W.open);
+  document.getElementById('cb').style.transform=W.open?'scale(.9)':'';
+  if(W.open){
+    connect();
+    W.unread=0;document.getElementById('cbadge').classList.remove('on');
+    document.getElementById('c-wts').textContent=fmt(Date.now());
+    if(W.sessionId)cShowScreen('chat');else cShowStep('email');
   }
 }
 
-/* Screen switching */
-function cwShowScreen(name){
-  document.getElementById('cw-auth').classList.toggle('hidden', name!=='auth');
-  const chatScr=document.getElementById('cw-chat');
-  chatScr.classList.toggle('hidden', name!=='chat');
-  if(name==='chat'){
-    chatScr.style.display='flex';
-    document.getElementById('cw-auth').style.display='none';
-  } else {
-    chatScr.style.display='none';
-    document.getElementById('cw-auth').style.display='flex';
-  }
+function cShowScreen(s){
+  const auth=document.getElementById('cauth'),chat=document.getElementById('cchat');
+  if(s==='chat'){auth.classList.add('off');chat.classList.remove('off');chat.style.display='flex'}
+  else{auth.classList.remove('off');chat.classList.add('off');chat.style.display='none'}
 }
-function cwShowStep(step){
-  cwShowScreen('auth');
-  document.getElementById('cw-step-email').style.display = step==='email' ? '' : 'none';
-  document.getElementById('cw-step-otp').style.display   = step==='otp'   ? '' : 'none';
-  if(step==='email') document.getElementById('cw-email-inp').focus();
-  if(step==='otp')   document.getElementById('cw-otp-input').focus();
+function cShowStep(s){
+  cShowScreen('auth');
+  document.getElementById('cs-email').style.display=s==='email'?'':'none';
+  document.getElementById('cs-otp').style.display=s==='otp'?'':'none';
+  if(s==='email')document.getElementById('c-email').focus();
+  if(s==='otp')document.getElementById('c-otp').focus();
 }
 
-/* Request OTP */
-function cwRequestOtp(){
-  const email=document.getElementById('cw-email-inp').value.trim();
-  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-    document.getElementById('cw-email-err').textContent='Введите корректный email'; return;
-  }
-  cw.email=email.toLowerCase();
-  document.getElementById('cw-email-err').textContent='';
-  cwSetEmailLoading(true);
-  if(cw.socket) cw.socket.emit('auth:request-otp',{email:cw.email});
-  else { cwSetEmailLoading(false); document.getElementById('cw-email-err').textContent='Нет подключения к серверу'; }
+function cReqOtp(){
+  const email=document.getElementById('c-email').value.trim();
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){document.getElementById('c-eerr').textContent='Введите корректный email';return}
+  W.email=email.toLowerCase();M.email=W.email;
+  document.getElementById('c-eerr').textContent='';
+  cSetEmailLoad(true);
+  connect();
+  if(W.socket)W.socket.emit('auth:request-otp',{email:W.email});
 }
-function cwSetEmailLoading(on){
-  document.getElementById('cw-email-spin').style.display = on ? 'block' : 'none';
-  document.getElementById('cw-otp-lbl').textContent = on ? 'Отправляем…' : 'Получить код →';
-  document.getElementById('cw-otp-btn').disabled = on;
+function cSetEmailLoad(on){
+  document.getElementById('c-espin').style.display=on?'block':'none';
+  document.getElementById('c-elbl').textContent=on?'Отправляем…':'Получить код →';
+  document.getElementById('c-otp-btn').disabled=on;
 }
+function cVerify(){
+  const code=document.getElementById('c-otp').value.trim();
+  if(code.length<6){document.getElementById('c-oerr').textContent='Введите 6-значный код';return}
+  document.getElementById('c-oerr').textContent='';
+  document.getElementById('c-vspin').style.display='block';
+  document.getElementById('c-vlbl').textContent='Проверяем…';
+  document.getElementById('c-vbtn').disabled=true;
+  if(W.socket)W.socket.emit('auth:verify-otp',{email:W.email,code});
+}
+function cBack(){cShowStep('email');document.getElementById('c-eerr').textContent=''}
+function cResend(){
+  document.getElementById('c-oerr').textContent='Новый код отправлен ✓';
+  document.getElementById('c-oerr').style.color='var(--ok)';
+  document.getElementById('c-otp').value='';
+  if(W.socket)W.socket.emit('auth:request-otp',{email:W.email});
+  setTimeout(()=>{document.getElementById('c-oerr').textContent='';document.getElementById('c-oerr').style.color=''},3000);
+}
+function cSend(){
+  const text=document.getElementById('c-inp').value.trim();
+  if(!text||!W.sessionId)return;
+  if(W.socket)W.socket.emit('user:message',{sessionId:W.sessionId,text});
+  document.getElementById('c-inp').value='';
+  document.getElementById('c-inp').style.height='auto';
+}
+function cAppend(msg,scroll){
+  const isA=msg.from==='admin'||msg.isAdmin;
+  const w=document.createElement('div');w.className='cmsg '+(isA?'a':'u');
+  if(isA){w.innerHTML=`<div class="csender"><span class="cbot"><svg viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3V3h-2v2H9V3H7v2H4c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9h-2z"/></svg></span>Поддержка KiriPilot</div><div class="cbub">${esc(msg.text)}</div><div class="cts">${fmt(msg.timestamp)}</div>`}
+  else{w.innerHTML=`<div class="cbub">${esc(msg.text)}</div><div class="cts">${fmt(msg.timestamp)}</div>`}
+  document.getElementById('cmsgs').appendChild(w);
+  if(scroll)cScrollBot();
+}
+function cScrollBot(){const m=document.getElementById('cmsgs');m.scrollTop=m.scrollHeight}
+function fmt(ts){return new Date(ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}
 
-/* Verify OTP */
-function cwVerifyOtp(){
-  const code=document.getElementById('cw-otp-input').value.trim();
-  if(!code||code.length<6){document.getElementById('cw-otp-err').textContent='Введите 6-значный код'; return;}
-  document.getElementById('cw-otp-err').textContent='';
-  document.getElementById('cw-otp-spin').style.display='block';
-  document.getElementById('cw-verify-lbl').textContent='Проверяем…';
-  document.getElementById('cw-verify-btn').disabled=true;
-  if(cw.socket) cw.socket.emit('auth:verify-otp',{email:cw.email,code});
-}
-function cwBack(){ cwShowStep('email'); }
-function cwResend(){
-  document.getElementById('cw-otp-err').textContent='';
-  if(cw.socket) cw.socket.emit('auth:request-otp',{email:cw.email});
-  document.getElementById('cw-otp-input').value='';
-  document.getElementById('cw-otp-err').textContent='Новый код отправлен ✓';
-  document.getElementById('cw-otp-err').style.color='var(--success)';
-  setTimeout(()=>{
-    document.getElementById('cw-otp-err').textContent='';
-    document.getElementById('cw-otp-err').style.color='';
-  },3000);
-}
-
-function cwOnAuthSuccess(sessionId, history){
-  document.getElementById('cw-otp-spin').style.display='none';
-  document.getElementById('cw-verify-lbl').textContent='Подтвердить';
-  document.getElementById('cw-verify-btn').disabled=false;
-  cw.sessionId=sessionId;
-  localStorage.setItem('kiri_email',cw.email);
-  localStorage.setItem('kiri_session',sessionId);
-  if(history?.length){ history.forEach(m=>cwAppend(m,false)); cwScrollBottom(); }
-  cwShowScreen('chat');
-  document.getElementById('cw-msg-inp').focus();
-}
-function cwOnAuthError(msg){
-  document.getElementById('cw-email-spin').style.display='none';
-  document.getElementById('cw-otp-lbl').textContent='Получить код →';
-  document.getElementById('cw-otp-btn').disabled=false;
-  document.getElementById('cw-otp-spin').style.display='none';
-  document.getElementById('cw-verify-lbl').textContent='Подтвердить';
-  document.getElementById('cw-verify-btn').disabled=false;
-  const emailVisible = document.getElementById('cw-step-email').style.display !== 'none';
-  if(emailVisible) document.getElementById('cw-email-err').textContent=msg;
-  else             document.getElementById('cw-otp-err').textContent=msg;
-}
-
-/* Send message */
-function cwSend(){
-  const text=document.getElementById('cw-msg-inp').value.trim();
-  if(!text||!cw.sessionId) return;
-  if(cw.socket) cw.socket.emit('user:message',{sessionId:cw.sessionId,text});
-  document.getElementById('cw-msg-inp').value='';
-  document.getElementById('cw-msg-inp').style.height='auto';
-}
-document.getElementById('cw-msg-inp').addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();cwSend();}
-});
-document.getElementById('cw-msg-inp').addEventListener('input',function(){
-  this.style.height='auto'; this.style.height=this.scrollHeight+'px';
-});
-
-/* Receive message */
-function cwOnMessage(msg){
-  cwAppend(msg, true);
-  if(!cw.open && msg.from==='admin'){
-    cw.unread++;
-    const b=document.getElementById('chat-badge');
-    b.textContent=cw.unread; b.classList.add('on');
-  }
-}
-
-/* Append bubble */
-function cwAppend(msg, scroll){
-  const isAdmin = msg.from==='admin'||msg.isAdmin;
-  const wrap=document.createElement('div');
-  wrap.className=`cw-msg ${isAdmin?'from-admin':'from-user'}`;
-  if(isAdmin){
-    wrap.innerHTML=`
-      <div class="cw-msg-sender">
-        <span class="cw-bot-ic"><svg viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3V3h-2v2H9V3H7v2H4c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9h-2z"/></svg></span>
-        Поддержка KiriPilot
-      </div>
-      <div class="cw-bubble">${cwEsc(msg.text)}</div>
-      <div class="cw-ts">${cwFmtTime(msg.timestamp)}</div>`;
-  } else {
-    wrap.innerHTML=`<div class="cw-bubble">${cwEsc(msg.text)}</div><div class="cw-ts">${cwFmtTime(msg.timestamp)}</div>`;
-  }
-  document.getElementById('cw-msgs').appendChild(wrap);
-  if(scroll) cwScrollBottom();
-}
-function cwScrollBottom(){ const m=document.getElementById('cw-msgs'); m.scrollTop=m.scrollHeight; }
-function cwFmtTime(ts){ return new Date(ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}); }
-function cwEsc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>'); }
-
-/* Keyboard submit for OTP */
-document.getElementById('cw-otp-input').addEventListener('keydown',e=>{ if(e.key==='Enter') cwVerifyOtp(); });
-document.getElementById('cw-email-inp').addEventListener('keydown',e=>{ if(e.key==='Enter') cwRequestOtp(); });
-
-/* Expose functions to global scope (needed for onclick= in HTML with type=module) */
-Object.assign(window, {
-  toggleNav, navGo, goTo, showToast, faqToggle, submitContact,
-  openAuth, closeAuth, handleOverlayClick, switchTab, doLogin, doRegister, doSignOut,
-  toggleChat, openChatWidget, cwRequestOtp, cwVerifyOtp, cwBack, cwResend, cwSend,
-});
+document.getElementById('c-otp').addEventListener('keydown',e=>{if(e.key==='Enter')cVerify()});
+document.getElementById('c-email').addEventListener('keydown',e=>{if(e.key==='Enter')cReqOtp()});
+document.getElementById('c-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();cSend()}});
+document.getElementById('c-inp').addEventListener('input',function(){this.style.height='auto';this.style.height=this.scrollHeight+'px'});
+document.getElementById('m-email').addEventListener('keydown',e=>{if(e.key==='Enter')mSendOtp()});
+document.getElementById('m-otp').addEventListener('keydown',e=>{if(e.key==='Enter')mVerify()});
 </script>
 </body>
 </html>
