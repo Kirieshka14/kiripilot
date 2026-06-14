@@ -834,7 +834,7 @@ const W={open:false,email:localStorage.getItem('kiri_email')||null,sessionId:M.s
 function connect(){
   if(W.socket)return;
   try{
-    W.socket=io('https://kiripilot.onrender.com',{transports:['websocket']});
+    W.socket=io('https://kiripilot.onrender.com',{transports:['websocket','polling']});
 
     W.socket.on('auth:otp-sent',()=>{
       mSetEmailLoad(false);
