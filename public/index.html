@@ -751,6 +751,11 @@ async function mSendOtp(){
   document.getElementById('m-send-lbl').textContent='Отправляем…';
   document.getElementById('m-send-btn').disabled=true;
   connect(); W.email=M.email; if(W.socket)W.socket.emit('auth:request-otp',{email:M.email}); else{mSetEmailLoad(false);document.getElementById('m-email-err').textContent='Нет соединения с сервером'}
+  setTimeout(()=>{
+    if(document.getElementById('m-send-btn').disabled && document.getElementById('m-email-err').textContent===''){
+      document.getElementById('m-email-err').textContent='⏱️ Сервер не отвечает 8 сек. socket.connected='+(W.socket?W.socket.connected:'нет socket');
+    }
+  },8000);
 }
 function mSetEmailLoad(on){
   document.getElementById('m-send-spin').style.display=on?'block':'none';
@@ -836,6 +841,17 @@ function connect(){
   try{
     W.socket=io('https://kiripilot.onrender.com',{transports:['websocket','polling']});
 
+    W.socket.on('connect',()=>{
+      document.getElementById('m-email-err').textContent='✅ Соединение установлено, отправляем письмо...';
+      document.getElementById('m-email-err').style.color='var(--ok)';
+    });
+
+    W.socket.on('connect_error',(err)=>{
+      mSetEmailLoad(false);
+      document.getElementById('m-email-err').textContent='❌ Ошибка: '+err.message;
+      document.getElementById('m-email-err').style.color='var(--err)';
+    });
+
     W.socket.on('auth:otp-sent',()=>{
       mSetEmailLoad(false);
       onModalOtpSent();
@@ -870,7 +886,10 @@ function connect(){
       cAppend(msg,true);
       if(!W.open&&msg.from==='admin'){W.unread++;const b=document.getElementById('cbadge');b.textContent=W.unread;b.classList.add('on')}
     });
-  }catch(e){console.warn('No backend')}
+  }catch(e){
+    mSetEmailLoad(false);
+    document.getElementById('m-email-err').textContent='❌ Исключение: '+e.message;
+  }
 }
 
 function openChat(){if(!W.open)toggleChat()}
