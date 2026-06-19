@@ -45,7 +45,7 @@ function buildOtpEmailHtml(otp) {
   </div>
 </td></tr>
 <tr><td style="padding:24px 40px;border-top:1px solid rgba(79,142,247,0.15);">
-  <p style="color:#6b7280;font-size:11px;margin:0;text-align:center;">© KiriPilot.com</p>
+  <p style="color:#6b7280;font-size:11px;margin:0;text-align:center;">© KiriPilot.ru</p>
 </td></tr>
 </table>
 </td></tr>
@@ -55,7 +55,7 @@ function buildOtpEmailHtml(otp) {
 
 async function sendOtpEmail(email, otp) {
   await transporter.sendMail({
-    from:    `"KiriPilot" <${process.env.SMTP_USER}>`,
+    from:    `"KiriPilot" <no-reply@kiripilot.ru>`,
     to:      email,
     subject: `${otp} — код входа KiriPilot`,
     html:    buildOtpEmailHtml(otp),
