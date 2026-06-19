@@ -2,7 +2,6 @@ require('dotenv').config();
 const express    = require('express');
 const http       = require('http');
 const socketIO   = require('socket.io');
-const nodemailer = require('nodemailer');
 const path       = require('path');
 const crypto     = require('crypto');
 
@@ -11,18 +10,33 @@ const server = http.createServer(app);
 const io     = socketIO(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
 
 // ── Хранилища (в памяти) ──
-const pendingOTPs = new Map(); // email -> { code, expires, attempts }
-const sessions    = new Map(); // sessionId -> { email, socketId, messages[], createdAt }
-const admins      = new Map(); // socketId -> { name }
-const otpThrottle = new Map(); // email -> [timestamps]
+const pendingOTPs = new Map();
+const sessions    = new Map();
+const admins      = new Map();
+const otpThrottle = new Map();
 
-// ── Почта ──
-const transporter = nodemailer.createTransport({
-  host:   process.env.SMTP_HOST,
-  port:   parseInt(process.env.SMTP_PORT, 10) || 587,
-  secure: process.env.SMTP_SECURE === 'true',
-  auth:   { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-});
+// ── Отправка через Brevo API ──
+async function sendOtpEmail(email, otp) {
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': process.env.BREVO_API_KEY,
+    },
+    body: JSON.stringify({
+      sender:  { name: 'KiriPilot', email: 'no-reply@kiripilot.ru' },
+      to:      [{ email }],
+      subject: `${otp} — код входа KiriPilot`,
+      htmlContent: buildOtpEmailHtml(otp),
+      textContent: `Код: ${otp} (действителен 10 мин)`,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Brevo API error: ${res.status} ${err}`);
+  }
+}
 
 function buildOtpEmailHtml(otp) {
   return `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/></head>
@@ -53,16 +67,6 @@ function buildOtpEmailHtml(otp) {
 </body></html>`;
 }
 
-async function sendOtpEmail(email, otp) {
-  await transporter.sendMail({
-    from:    `"KiriPilot" <no-reply@kiripilot.ru>`,
-    to:      email,
-    subject: `${otp} — код входа KiriPilot`,
-    html:    buildOtpEmailHtml(otp),
-    text:    `Код: ${otp} (действителен 10 мин)`,
-  });
-}
-
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -89,7 +93,6 @@ io.on('connection', (socket) => {
     }
     const key = email.toLowerCase();
 
-    // Анти-спам: не больше 3 кодов на адрес за 10 минут
     const now    = Date.now();
     const recent = (otpThrottle.get(key) || []).filter((t) => now - t < 10 * 60 * 1000);
     if (recent.length >= 3) {
@@ -105,7 +108,7 @@ io.on('connection', (socket) => {
       await sendOtpEmail(key, otp);
       socket.emit('auth:otp-sent', { email: key });
     } catch (err) {
-      console.error('SMTP error:', err.message);
+      console.error('Brevo API error:', err.message);
       pendingOTPs.delete(key);
       socket.emit('auth:error', { message: 'Не удалось отправить письмо. Попробуйте позже.' });
     }
@@ -130,7 +133,6 @@ io.on('connection', (socket) => {
     }
     pendingOTPs.delete(key);
 
-    // Ищем существующую сессию по email или создаём новую
     let sessionId = null;
     for (const [id, s] of sessions.entries()) {
       if (s.email === key) { sessionId = id; s.socketId = socket.id; break; }
@@ -149,7 +151,7 @@ io.on('connection', (socket) => {
     notifyAdminsUserOnline(sessionId, session);
   });
 
-  // ── Возобновление сессии после перезагрузки страницы ──
+  // ── Возобновление сессии ──
   socket.on('session:resume', ({ sessionId } = {}) => {
     const session = sessionId && sessions.get(sessionId);
     if (!session) return socket.emit('session:invalid');
