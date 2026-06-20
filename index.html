@@ -118,8 +118,6 @@ body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-he
   margin-bottom:.2rem;
 }
 .modal-sub{font-size:.75rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.8rem}
-
-/* Modal steps */
 .m-step{display:flex;flex-direction:column;gap:1rem}
 .m-step.hidden{display:none}
 .m-icon{text-align:center}
@@ -153,7 +151,6 @@ body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-he
 .m-hint button{background:none;border:none;cursor:pointer;color:var(--a);font-size:.78rem;font-weight:600;text-decoration:underline}
 .m-back{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.78rem;text-align:center;transition:color .2s}
 .m-back:hover{color:var(--a)}
-/* User info in nav after login */
 .nav-user{display:flex;align-items:center;gap:.6rem}
 .nav-user-name{font-size:.82rem;color:var(--muted);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nav-user-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok);flex-shrink:0}
@@ -198,10 +195,7 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
 
 /* ABOUT */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:1rem}
-.card{
-  background:var(--s1);border:1px solid var(--b);border-radius:var(--r);padding:1.6rem;
-  transition:border-color .3s,transform .3s;
-}
+.card{background:var(--s1);border:1px solid var(--b);border-radius:var(--r);padding:1.6rem;transition:border-color .3s,transform .3s}
 .card:hover{border-color:var(--b2);transform:translateY(-4px)}
 .card .ic{font-size:1.5rem;margin-bottom:.8rem;display:block}
 .card h3{font-family:'Space Grotesk',sans-serif;font-size:.97rem;font-weight:600;margin-bottom:.4rem}
@@ -273,28 +267,13 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ══ CHAT WIDGET ══ */
-#cb{
-  position:fixed;bottom:24px;right:24px;z-index:8000;
-  width:56px;height:56px;border-radius:50%;
-  background:linear-gradient(135deg,var(--a),var(--a2));
-  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  animation:cpulse 3s ease-out infinite;
-  transition:transform .25s,box-shadow .25s;
-}
+#cb{position:fixed;bottom:24px;right:24px;z-index:8000;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--a2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;animation:cpulse 3s ease-out infinite;transition:transform .25s,box-shadow .25s}
 #cb:hover{transform:scale(1.1);box-shadow:0 0 28px rgba(91,156,246,0.5)}
 #cb svg{width:23px;height:23px;fill:#fff;flex-shrink:0}
 @keyframes cpulse{0%{box-shadow:0 0 0 0 rgba(91,156,246,0.5)}70%{box-shadow:0 0 0 12px rgba(91,156,246,0)}100%{box-shadow:0 0 0 0 rgba(91,156,246,0)}}
 #cbadge{position:absolute;top:-3px;right:-3px;background:var(--err);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);opacity:0;transform:scale(0);transition:opacity .2s,transform .2s}
 #cbadge.on{opacity:1;transform:scale(1)}
-#cwin{
-  position:fixed;bottom:92px;right:24px;z-index:7999;
-  width:355px;height:510px;
-  background:var(--s1);border:1px solid var(--b2);border-radius:18px;
-  display:flex;flex-direction:column;overflow:hidden;
-  box-shadow:0 8px 48px rgba(0,0,0,0.7),0 0 60px rgba(91,156,246,0.07);
-  opacity:0;transform:translateY(14px) scale(.97);pointer-events:none;
-  transition:opacity .3s cubic-bezier(.16,1,.3,1),transform .3s cubic-bezier(.16,1,.3,1);
-}
+#cwin{position:fixed;bottom:92px;right:24px;z-index:7999;width:355px;height:510px;background:var(--s1);border:1px solid var(--b2);border-radius:18px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 48px rgba(0,0,0,0.7),0 0 60px rgba(91,156,246,0.07);opacity:0;transform:translateY(14px) scale(.97);pointer-events:none;transition:opacity .3s cubic-bezier(.16,1,.3,1),transform .3s cubic-bezier(.16,1,.3,1)}
 #cwin.on{opacity:1;transform:none;pointer-events:all}
 .chead{flex-shrink:0;padding:13px 15px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:10px;background:rgba(91,156,246,0.04)}
 .cav{width:33px;height:33px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 12px rgba(91,156,246,0.4)}
@@ -306,10 +285,8 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
 .cx{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;border-radius:6px;display:flex;align-items:center;transition:color .2s,background .2s;flex-shrink:0}
 .cx:hover{color:var(--txt);background:rgba(255,255,255,0.06)}
 .cx svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
-/* screens */
 .cscr{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
 .cscr.off{display:none}
-/* auth screen */
 #cauth{padding:22px 18px;gap:13px;justify-content:center}
 .cauth-icon{text-align:center}
 .cauth-icon svg{width:40px;height:40px;stroke:var(--a);fill:none;stroke-width:1.5;filter:drop-shadow(0 0 10px rgba(91,156,246,0.5))}
@@ -329,7 +306,6 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
 .cwrap{position:relative}
 .cback{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em;transition:color .2s}
 .cback:hover{color:var(--a)}
-/* chat screen */
 #cchat{display:none;flex-direction:column}
 .cmsgs{flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:rgba(91,156,246,0.2) transparent}
 .cmsgs::-webkit-scrollbar{width:3px}
@@ -352,7 +328,6 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
 .csend-btn:hover{opacity:.9;transform:scale(1.06)}
 .csend-btn svg{width:14px;height:14px;fill:#fff}
 
-/* ── RESPONSIVE ── */
 @media(max-width:640px){
   .nav-links,.nav-right{display:none}
   .burger{display:flex}
@@ -375,24 +350,23 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
 
 <canvas id="cv"></canvas>
 
-<!-- ══ NAV ══ -->
 <nav class="nav" id="nav">
   <div class="nav-inner">
     <a href="#" class="nav-logo">KiriPilot</a>
     <ul class="nav-links">
-      <li><a href="#about"   data-s="about">О продукте</a></li>
+      <li><a href="#about" data-s="about">О продукте</a></li>
       <li><a href="#pricing" data-s="pricing">Подписка</a></li>
       <li><a href="#support" data-s="support">Поддержка</a></li>
       <li><a href="#contact" data-s="contact">Контакты</a></li>
     </ul>
     <div class="nav-right" id="nav-right">
       <button class="btn-ghost" onclick="openModal()">Войти</button>
-      <button class="btn-pill"  onclick="openModal()">Регистрация</button>
+      <button class="btn-pill" onclick="openModal()">Регистрация</button>
     </div>
     <button class="burger" id="burger" onclick="toggleNav()"><span></span><span></span><span></span></button>
   </div>
   <div class="mob-menu" id="mob-menu">
-    <a href="#about"   onclick="navGo('about')">О продукте</a>
+    <a href="#about" onclick="navGo('about')">О продукте</a>
     <a href="#pricing" onclick="navGo('pricing')">Подписка</a>
     <a href="#support" onclick="navGo('support')">Поддержка</a>
     <a href="#contact" onclick="navGo('contact')">Контакты</a>
@@ -403,54 +377,32 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
   </div>
 </nav>
 
-<!-- ══ AUTH MODAL (OTP) ══ -->
 <div class="overlay" id="overlay" onclick="overlayClick(event)">
   <div class="modal">
     <button class="modal-x" onclick="closeModal()">✕</button>
     <div class="modal-logo">KiriPilot</div>
     <div class="modal-sub">Вход / Регистрация</div>
-
-    <!-- Step 1: email -->
     <div class="m-step" id="ms-email">
-      <div class="m-icon">
-        <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
-      </div>
+      <div class="m-icon"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></div>
       <div class="m-title">Введите ваш email</div>
       <div class="m-desc">Пришлём 6-значный код для входа. Пароль не нужен.</div>
-      <div>
-        <span class="m-label">Email</span>
-        <input class="m-inp" id="m-email" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email"/>
-      </div>
-      <button class="m-btn" id="m-send-btn" onclick="mSendOtp()">
-        <span class="m-spin" id="m-send-spin"></span>
-        <span id="m-send-lbl">Получить код →</span>
-      </button>
+      <div><span class="m-label">Email</span><input class="m-inp" id="m-email" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email"/></div>
+      <button class="m-btn" id="m-send-btn" onclick="mSendOtp()"><span class="m-spin" id="m-send-spin"></span><span id="m-send-lbl">Получить код →</span></button>
       <div class="m-err" id="m-email-err"></div>
       <div class="m-hint">Мы не передаём email третьим лицам</div>
     </div>
-
-    <!-- Step 2: OTP -->
     <div class="m-step hidden" id="ms-otp">
-      <div class="m-icon">
-        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      </div>
+      <div class="m-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
       <div class="m-title">Введите код</div>
       <div class="m-desc" id="m-otp-desc">Код отправлен на ваш email</div>
       <input class="m-inp otp-style" id="m-otp" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code"/>
-      <button class="m-btn" id="m-verify-btn" onclick="mVerify()">
-        <span class="m-spin" id="m-verify-spin"></span>
-        <span id="m-verify-lbl">Войти</span>
-      </button>
+      <button class="m-btn" id="m-verify-btn" onclick="mVerify()"><span class="m-spin" id="m-verify-spin"></span><span id="m-verify-lbl">Войти</span></button>
       <div class="m-err" id="m-otp-err"></div>
       <div class="m-hint">Не пришло? <button onclick="mResend()">Отправить снова</button></div>
       <button class="m-back" onclick="mBack()">← Изменить email</button>
     </div>
-
-    <!-- Step 3: success -->
     <div class="m-step hidden" id="ms-ok">
-      <div class="m-icon">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-      </div>
+      <div class="m-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div>
       <div class="m-title">Вы вошли! 👋</div>
       <div class="m-desc" id="m-ok-desc">Добро пожаловать в KiriPilot</div>
       <button class="m-btn" onclick="closeModal()">Закрыть</button>
@@ -458,19 +410,16 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
   </div>
 </div>
 
-<!-- ══ PAGE ══ -->
 <div class="page">
-
-  <!-- HERO -->
   <section class="hero" id="hero">
     <div class="hud">
       <svg class="sp1" viewBox="0 0 300 300" fill="none">
         <circle cx="150" cy="150" r="135" stroke="url(#g1)" stroke-width="1" stroke-dasharray="8 16" stroke-linecap="round"/>
         <circle cx="150" cy="150" r="102" stroke="url(#g1)" stroke-width="1.5" stroke-dasharray="50 26" stroke-linecap="round"/>
         <g stroke="#5b9cf6" stroke-width="1.5" stroke-opacity=".4">
-          <line x1="150" y1="6"   x2="150" y2="18"/>
+          <line x1="150" y1="6" x2="150" y2="18"/>
           <line x1="150" y1="282" x2="150" y2="294"/>
-          <line x1="6"   y1="150" x2="18"  y2="150"/>
+          <line x1="6" y1="150" x2="18" y2="150"/>
           <line x1="282" y1="150" x2="294" y2="150"/>
         </g>
         <defs>
@@ -500,7 +449,6 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
 
   <div class="div"></div>
 
-  <!-- ABOUT -->
   <section id="about">
     <div class="inner">
       <div class="eyebrow">О продукте</div>
@@ -519,7 +467,6 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
 
   <div class="div"></div>
 
-  <!-- PRICING -->
   <section id="pricing">
     <div class="inner" style="display:flex;flex-direction:column;align-items:center">
       <div class="eyebrow">Подписка</div>
@@ -560,7 +507,6 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
 
   <div class="div"></div>
 
-  <!-- SUPPORT -->
   <section id="support">
     <div class="inner">
       <div class="eyebrow">Поддержка</div>
@@ -586,7 +532,6 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
 
   <div class="div"></div>
 
-  <!-- CONTACT -->
   <section id="contact">
     <div class="inner" style="display:flex;flex-direction:column;align-items:center">
       <div class="eyebrow">Связаться</div>
@@ -606,7 +551,7 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
   <footer class="foot">
     <div class="foot-logo">KiriPilot</div>
     <nav class="foot-links">
-      <a href="#about"   onclick="goTo('about')">О продукте</a>
+      <a href="#about" onclick="goTo('about')">О продукте</a>
       <a href="#pricing" onclick="goTo('pricing')">Подписка</a>
       <a href="#support" onclick="goTo('support')">Поддержка</a>
       <a href="#contact" onclick="goTo('contact')">Контакты</a>
@@ -618,7 +563,6 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
 
 <div id="toast"></div>
 
-<!-- ══ CHAT WIDGET ══ -->
 <button id="cb" onclick="toggleChat()">
   <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
   <span id="cbadge"></span>
@@ -633,18 +577,13 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
     </div>
     <button class="cx" onclick="toggleChat()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
-
-  <!-- Auth -->
   <div class="cscr" id="cauth">
     <div id="cs-email">
       <div class="cauth-icon"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></div>
       <div class="cauth-title">Начать чат</div>
       <div class="cauth-desc">Введите email — пришлём 6-значный код</div>
       <input class="cinp" id="c-email" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email"/>
-      <button class="cbtn" id="c-otp-btn" onclick="cReqOtp()">
-        <span class="cspin" id="c-espin"></span>
-        <span id="c-elbl">Получить код →</span>
-      </button>
+      <button class="cbtn" id="c-otp-btn" onclick="cReqOtp()"><span class="cspin" id="c-espin"></span><span id="c-elbl">Получить код →</span></button>
       <div class="cerr" id="c-eerr"></div>
       <div class="chint">Мы не передаём email третьим лицам</div>
     </div>
@@ -656,16 +595,11 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
         <input class="cinp otp" id="c-otp" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code"/>
         <button class="cback" onclick="cBack()">Назад</button>
       </div>
-      <button class="cbtn" id="c-vbtn" onclick="cVerify()">
-        <span class="cspin" id="c-vspin"></span>
-        <span id="c-vlbl">Подтвердить</span>
-      </button>
+      <button class="cbtn" id="c-vbtn" onclick="cVerify()"><span class="cspin" id="c-vspin"></span><span id="c-vlbl">Подтвердить</span></button>
       <div class="cerr" id="c-oerr"></div>
       <div class="chint">Не пришло? <button onclick="cResend()">Отправить снова</button></div>
     </div>
   </div>
-
-  <!-- Chat -->
   <div class="cscr off" id="cchat">
     <div class="cmsgs" id="cmsgs">
       <div class="cmsg a">
@@ -681,11 +615,11 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
   </div>
 </div>
 
-<script src="https://kiripilot.onrender.com/socket.io/socket.io.js"></script>
+<!-- ИСПРАВЛЕНО: подключаемся к текущему домену, не к onrender.com -->
+<script src="/socket.io/socket.io.js"></script>
 <script>
 'use strict';
 
-/* ── Stars ── */
 (()=>{
   const c=document.getElementById('cv'),x=c.getContext('2d');
   let s=[];
@@ -695,7 +629,6 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
   addEventListener('resize',()=>{rs();is()});rs();is();dr();
 })();
 
-/* ── Nav ── */
 function toggleNav(){document.getElementById('nav').classList.toggle('open')}
 function navGo(id){document.getElementById('nav').classList.remove('open');if(id)setTimeout(()=>goTo(id),260)}
 function goTo(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'})}
@@ -707,14 +640,9 @@ function goTo(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'
 })();
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElementById('nav').classList.remove('open');closeModal()}});
 
-/* ── Toast ── */
 let _tt;
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('on'),3000)}
-
-/* ── FAQ ── */
 function faq(b){const i=b.parentElement,o=i.classList.contains('open');document.querySelectorAll('.fitem.open').forEach(x=>x.classList.remove('open'));if(!o)i.classList.add('open')}
-
-/* ── Contact ── */
 function sendContact(){
   const n=document.getElementById('cf-n').value.trim(),e=document.getElementById('cf-e').value.trim(),t=document.getElementById('cf-t').value,m=document.getElementById('cf-m').value.trim();
   if(!n||!e||!t||!m){toast('Заполни все поля 📝');return}
@@ -724,9 +652,6 @@ function sendContact(){
   toast('Отправлено! ✅');
 }
 
-/* ══════════════════════════════
-   AUTH MODAL (OTP через сервер)
-══════════════════════════════ */
 const M={email:null,sessionId:localStorage.getItem('kiri_sid')||null};
 
 function openModal(){
@@ -737,32 +662,24 @@ function openModal(){
 }
 function closeModal(){document.getElementById('overlay').classList.remove('on')}
 function overlayClick(e){if(e.target===document.getElementById('overlay'))closeModal()}
-
-function mShowStep(s){
-  ['email','otp','ok'].forEach(n=>document.getElementById('ms-'+n).classList.toggle('hidden',n!==s));
-}
+function mShowStep(s){['email','otp','ok'].forEach(n=>document.getElementById('ms-'+n).classList.toggle('hidden',n!==s))}
 
 async function mSendOtp(){
   const email=document.getElementById('m-email').value.trim();
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){document.getElementById('m-email-err').textContent='Введите корректный email';return}
   M.email=email.toLowerCase();
   document.getElementById('m-email-err').textContent='';
-  document.getElementById('m-send-spin').style.display='block';
-  document.getElementById('m-send-lbl').textContent='Отправляем…';
-  document.getElementById('m-send-btn').disabled=true;
-  connect(); W.email=M.email; if(W.socket)W.socket.emit('auth:request-otp',{email:M.email}); else{mSetEmailLoad(false);document.getElementById('m-email-err').textContent='Нет соединения с сервером'}
-  setTimeout(()=>{
-    if(document.getElementById('m-send-btn').disabled && document.getElementById('m-email-err').textContent===''){
-      document.getElementById('m-email-err').textContent='⏱️ Сервер не отвечает 8 сек. socket.connected='+(W.socket?W.socket.connected:'нет socket');
-    }
-  },8000);
+  mSetEmailLoad(true);
+  connect();
+  W.email=M.email;
+  if(W.socket)W.socket.emit('auth:request-otp',{email:M.email});
+  else{mSetEmailLoad(false);document.getElementById('m-email-err').textContent='Нет соединения с сервером'}
 }
 function mSetEmailLoad(on){
   document.getElementById('m-send-spin').style.display=on?'block':'none';
   document.getElementById('m-send-lbl').textContent=on?'Отправляем…':'Получить код →';
   document.getElementById('m-send-btn').disabled=on;
 }
-
 function mVerify(){
   const code=document.getElementById('m-otp').value.trim();
   if(code.length<6){document.getElementById('m-otp-err').textContent='Введите 6-значный код';return}
@@ -780,7 +697,6 @@ function mResend(){
   if(W.socket)W.socket.emit('auth:request-otp',{email:M.email});
   setTimeout(()=>{document.getElementById('m-otp-err').textContent='';document.getElementById('m-otp-err').style.color=''},3000);
 }
-
 function onModalOtpSent(){
   mSetEmailLoad(false);
   document.getElementById('m-otp-desc').textContent='Код отправлен на '+M.email;
@@ -808,7 +724,6 @@ function onModalError(msg){
   if(emailStep)document.getElementById('m-email-err').textContent=msg;
   else document.getElementById('m-otp-err').textContent=msg;
 }
-
 function updateNavUser(loggedIn){
   const nr=document.getElementById('nav-right');
   const mb=document.getElementById('mob-btns');
@@ -827,44 +742,36 @@ function doLogout(){
   localStorage.removeItem('kiri_sid');localStorage.removeItem('kiri_email');
   updateNavUser(false);toast('Вы вышли из аккаунта');
 }
-
-// Restore session on page load
 if(M.sessionId){updateNavUser(true)}
 
-/* ══════════════════════════════
-   CHAT WIDGET
-══════════════════════════════ */
 const W={open:false,email:localStorage.getItem('kiri_email')||null,sessionId:M.sessionId,unread:0,socket:null};
 
 function connect(){
   if(W.socket)return;
   try{
-    W.socket=io('https://kiripilot.onrender.com',{transports:['websocket','polling']});
-
+    // ИСПРАВЛЕНО: подключаемся к текущему домену
+    W.socket=io(window.location.origin,{transports:['websocket','polling']});
     W.socket.on('connect',()=>{
-      document.getElementById('m-email-err').textContent='✅ Соединение установлено, отправляем письмо...';
-      document.getElementById('m-email-err').style.color='var(--ok)';
+      console.log('Socket connected');
+      // Heartbeat — держим соединение живым на Render
+      if(W._pingInterval)clearInterval(W._pingInterval);
+      W._pingInterval=setInterval(()=>{if(W.socket?.connected)W.socket.emit('ping')},25000);
     });
-
+    W.socket.on('pong',()=>{});
     W.socket.on('connect_error',(err)=>{
       mSetEmailLoad(false);
-      document.getElementById('m-email-err').textContent='❌ Ошибка: '+err.message;
+      document.getElementById('m-email-err').textContent='❌ Ошибка соединения: '+err.message;
       document.getElementById('m-email-err').style.color='var(--err)';
     });
-
     W.socket.on('auth:otp-sent',()=>{
       mSetEmailLoad(false);
       onModalOtpSent();
-      // also handle chat widget otp step
       cSetEmailLoad(false);
       document.getElementById('c-odesc').textContent='Код отправлен на '+W.email;
       cShowStep('otp');
     });
-
     W.socket.on('auth:success',({sessionId,history})=>{
-      // modal success
       if(!M.sessionId)onModalSuccess(sessionId);
-      // chat success
       W.sessionId=sessionId;M.sessionId=sessionId;
       localStorage.setItem('kiri_sid',sessionId);
       if(history?.length){history.forEach(m=>cAppend(m,false));cScrollBot()}
@@ -872,7 +779,6 @@ function connect(){
       document.getElementById('c-wts').textContent=fmt(Date.now());
       document.getElementById('c-inp').focus();
     });
-
     W.socket.on('auth:error',({message})=>{
       onModalError(message);
       cSetEmailLoad(false);
@@ -881,7 +787,6 @@ function connect(){
       document.getElementById('c-vbtn').disabled=false;
       document.getElementById('c-oerr').textContent=message;
     });
-
     W.socket.on('chat:message',msg=>{
       cAppend(msg,true);
       if(!W.open&&msg.from==='admin'){W.unread++;const b=document.getElementById('cbadge');b.textContent=W.unread;b.classList.add('on')}
@@ -904,7 +809,6 @@ function toggleChat(){
     if(W.sessionId)cShowScreen('chat');else cShowStep('email');
   }
 }
-
 function cShowScreen(s){
   const auth=document.getElementById('cauth'),chat=document.getElementById('cchat');
   if(s==='chat'){auth.classList.add('off');chat.classList.remove('off');chat.style.display='flex'}
@@ -917,7 +821,6 @@ function cShowStep(s){
   if(s==='email')document.getElementById('c-email').focus();
   if(s==='otp')document.getElementById('c-otp').focus();
 }
-
 function cReqOtp(){
   const email=document.getElementById('c-email').value.trim();
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){document.getElementById('c-eerr').textContent='Введите корректный email';return}
