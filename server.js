@@ -7,15 +7,17 @@ const crypto     = require('crypto');
 
 const app    = express();
 const server = http.createServer(app);
-const io     = socketIO(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
+const io     = socketIO(server, {
+  cors: { origin: '*', methods: ['GET', 'POST'] },
+  pingInterval: 25000,
+  pingTimeout: 60000,
+});
 
-// ── Хранилища (в памяти) ──
 const pendingOTPs = new Map();
 const sessions    = new Map();
 const admins      = new Map();
 const otpThrottle = new Map();
 
-// ── Отправка через Brevo API ──
 async function sendOtpEmail(email, otp) {
   const res = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
@@ -24,14 +26,13 @@ async function sendOtpEmail(email, otp) {
       'api-key': process.env.BREVO_API_KEY,
     },
     body: JSON.stringify({
-      sender:  { name: 'KiriPilot', email: 'no-reply@kiripilot.ru' },
-      to:      [{ email }],
-      subject: `${otp} — код входа KiriPilot`,
+      sender:      { name: 'KiriPilot', email: 'no-reply@kiripilot.ru' },
+      to:          [{ email }],
+      subject:     `${otp} — код входа KiriPilot`,
       htmlContent: buildOtpEmailHtml(otp),
       textContent: `Код: ${otp} (действителен 10 мин)`,
     }),
   });
-
   if (!res.ok) {
     const err = await res.text();
     throw new Error(`Brevo API error: ${res.status} ${err}`);
@@ -86,13 +87,14 @@ function notifyAdminsUserOnline(sessionId, session) {
 
 io.on('connection', (socket) => {
 
-  // ── Запрос кода на почту ──
+  // Heartbeat — держим соединение живым
+  socket.on('ping', () => socket.emit('pong'));
+
   socket.on('auth:request-otp', async ({ email } = {}) => {
     if (!email || !EMAIL_RE.test(email)) {
       return socket.emit('auth:error', { message: 'Некорректный email' });
     }
     const key = email.toLowerCase();
-
     const now    = Date.now();
     const recent = (otpThrottle.get(key) || []).filter((t) => now - t < 10 * 60 * 1000);
     if (recent.length >= 3) {
@@ -100,10 +102,8 @@ io.on('connection', (socket) => {
     }
     recent.push(now);
     otpThrottle.set(key, recent);
-
     const otp = String(crypto.randomInt(100000, 1000000));
     pendingOTPs.set(key, { code: otp, expires: now + 10 * 60 * 1000, attempts: 0 });
-
     try {
       await sendOtpEmail(key, otp);
       socket.emit('auth:otp-sent', { email: key });
@@ -114,7 +114,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ── Проверка кода ──
   socket.on('auth:verify-otp', ({ email, code } = {}) => {
     const key     = email ? String(email).toLowerCase() : null;
     const pending = key && pendingOTPs.get(key);
@@ -132,7 +131,6 @@ io.on('connection', (socket) => {
       return socket.emit('auth:error', { message: 'Неверный код.' });
     }
     pendingOTPs.delete(key);
-
     let sessionId = null;
     for (const [id, s] of sessions.entries()) {
       if (s.email === key) { sessionId = id; s.socketId = socket.id; break; }
@@ -141,17 +139,14 @@ io.on('connection', (socket) => {
       sessionId = crypto.randomUUID();
       sessions.set(sessionId, { email: key, socketId: socket.id, messages: [], createdAt: Date.now() });
     }
-
     socket.sessionId = sessionId;
     socket.userEmail = key;
     socket.join(`session:${sessionId}`);
-
     const session = sessions.get(sessionId);
     socket.emit('auth:success', { sessionId, email: key, history: session.messages });
     notifyAdminsUserOnline(sessionId, session);
   });
 
-  // ── Возобновление сессии ──
   socket.on('session:resume', ({ sessionId } = {}) => {
     const session = sessionId && sessions.get(sessionId);
     if (!session) return socket.emit('session:invalid');
@@ -163,7 +158,6 @@ io.on('connection', (socket) => {
     notifyAdminsUserOnline(sessionId, session);
   });
 
-  // ── Сообщение от пользователя ──
   socket.on('user:message', ({ sessionId, text } = {}) => {
     if (!sessionId || !text?.trim()) return;
     const session = sessions.get(sessionId);
@@ -181,7 +175,6 @@ io.on('connection', (socket) => {
     io.to('admins').emit('admin:message', { ...message, sessionId });
   });
 
-  // ── Вход админа ──
   socket.on('admin:login', ({ token, name } = {}) => {
     if (!process.env.ADMIN_TOKEN || token !== process.env.ADMIN_TOKEN) {
       return socket.emit('admin:auth-error', { message: 'Неверный токен' });
@@ -191,7 +184,6 @@ io.on('connection', (socket) => {
     socket.isAdmin   = true;
     socket.adminName = adminName;
     admins.set(socket.id, { name: adminName });
-
     const activeSessions = [];
     for (const [id, s] of sessions.entries()) {
       activeSessions.push({
@@ -206,7 +198,6 @@ io.on('connection', (socket) => {
     socket.to('admins').emit('admin:colleague-joined', { name: adminName });
   });
 
-  // ── История для админа ──
   socket.on('admin:get-history', ({ sessionId } = {}) => {
     if (!socket.isAdmin) return;
     const session = sessions.get(sessionId);
@@ -214,7 +205,6 @@ io.on('connection', (socket) => {
     socket.emit('admin:history', { sessionId, email: session.email, messages: session.messages });
   });
 
-  // ── Ответ админа ──
   socket.on('admin:reply', ({ sessionId, text } = {}) => {
     if (!socket.isAdmin || !text?.trim()) return;
     const session = sessions.get(sessionId);
