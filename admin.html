@@ -2,220 +2,391 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>KiriPilot — Панель поддержки</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:#07080f;--surface:#0e1021;--surface2:#131629;--surface3:#191e38;
-      --border:rgba(79,142,247,0.15);--border2:rgba(79,142,247,0.25);
-      --accent:#4f8ef7;--accent2:#a78bfa;--success:#4ade80;--danger:#f87171;
-      --warn:#fbbf24;--text:#e8eaf6;--muted:#6b7280;--glow:rgba(79,142,247,0.25);
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0a0b12;
+      --surface:#12141f;
+      --surface2:#1a1d2e;
+      --surface3:#1e2135;
+      --border:rgba(255,255,255,0.07);
+      --border2:rgba(91,142,245,0.2);
+      --accent:#5b8ef5;
+      --accent2:#8b5cf6;
+      --ok:#34d399;
+      --err:#f87171;
+      --warn:#fbbf24;
+      --txt:#f0f1f8;
+      --muted:#6b7280;
+      --user-bubble:#1e2135;
+      --admin-bubble:linear-gradient(135deg,rgba(91,142,245,0.18),rgba(139,92,246,0.18));
+      --safe-bottom:env(safe-area-inset-bottom,0px);
     }
-    html,body{height:100%}
-    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;overflow:hidden}
-    #login-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px}
-    .login-card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:40px 36px;box-shadow:0 0 0 1px rgba(79,142,247,0.06),0 24px 80px rgba(0,0,0,0.7),0 0 60px rgba(79,142,247,0.08)}
-    .login-logo{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
-    .login-subtitle{color:var(--muted);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:32px}
-    .login-field{margin-bottom:14px}
-    .login-label{display:block;font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
-    .login-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--text);font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
-    .login-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,0.12)}
-    .login-btn{width:100%;margin-top:8px;padding:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.04em;border:none;border-radius:10px;cursor:pointer;transition:opacity 0.2s;box-shadow:0 0 24px var(--glow)}
-    .login-btn:hover{opacity:0.9}
-    .login-error{margin-top:10px;font-size:12px;color:var(--danger);text-align:center;min-height:18px}
-    #admin-panel{display:none;height:100vh;flex-direction:column}
-    .topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0;z-index:10}
-    .topbar-logo{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-    .topbar-sep{width:1px;height:20px;background:var(--border)}
-    .topbar-label{font-size:12px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
-    .topbar-spacer{flex:1}
-    .colleagues{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
-    .colleague-chip{background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.2);border-radius:100px;padding:3px 10px;font-size:11px;color:var(--accent);display:flex;align-items:center;gap:5px}
-    .colleague-chip::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--success)}
-    .my-badge{background:linear-gradient(135deg,rgba(79,142,247,0.15),rgba(167,139,250,0.15));border:1px solid rgba(79,142,247,0.25);border-radius:100px;padding:4px 12px;font-size:12px;color:var(--text);font-weight:500}
+
+    html,body{height:100%;overflow:hidden;background:var(--bg)}
+    body{font-family:'Inter',sans-serif;color:var(--txt);display:flex;flex-direction:column}
+
+    /* ── LOGIN ── */
+    #login{
+      position:fixed;inset:0;z-index:100;
+      display:flex;align-items:center;justify-content:center;
+      background:var(--bg);padding:1.5rem;
+    }
+    .login-card{
+      width:100%;max-width:380px;
+      background:var(--surface);
+      border:1px solid var(--border2);
+      border-radius:22px;padding:2.2rem 2rem;
+      box-shadow:0 0 60px rgba(91,142,245,0.08),0 24px 60px rgba(0,0,0,0.6);
+    }
+    .login-logo{
+      font-size:1.5rem;font-weight:700;letter-spacing:-0.03em;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      margin-bottom:4px;
+    }
+    .login-sub{font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.8rem}
+    .login-field{margin-bottom:1rem}
+    .login-label{display:block;font-size:0.7rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+    .login-inp{
+      width:100%;background:var(--surface2);border:1.5px solid var(--border);
+      border-radius:12px;padding:0.8rem 1rem;
+      font-size:0.95rem;color:var(--txt);font-family:'Inter',sans-serif;outline:none;
+      transition:border-color .2s,box-shadow .2s;
+    }
+    .login-inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,142,245,0.12)}
+    .login-btn{
+      width:100%;margin-top:0.5rem;padding:0.85rem;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff;font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:600;
+      border:none;border-radius:12px;cursor:pointer;
+      transition:opacity .2s;box-shadow:0 4px 20px rgba(91,142,245,0.3);
+    }
+    .login-btn:hover{opacity:.9}
+    .login-err{margin-top:0.6rem;font-size:0.75rem;color:var(--err);text-align:center;min-height:18px}
+
+    /* ── MAIN PANEL ── */
+    #panel{display:none;flex:1;flex-direction:column;height:100vh}
+    #panel.on{display:flex}
+
+    /* Topbar */
+    .topbar{
+      flex-shrink:0;height:54px;
+      background:var(--surface);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;padding:0 1.2rem;gap:1rem;
+    }
+    .tb-logo{
+      font-size:1.1rem;font-weight:700;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .tb-sep{width:1px;height:18px;background:var(--border)}
+    .tb-label{font-size:0.7rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
+    .tb-space{flex:1}
+    .tb-badge{
+      background:linear-gradient(135deg,rgba(91,142,245,0.15),rgba(139,92,246,0.15));
+      border:1px solid var(--border2);border-radius:100px;
+      padding:3px 12px;font-size:0.75rem;color:var(--txt);font-weight:500;
+    }
+    .colleagues{display:flex;gap:6px}
+    .col-chip{
+      background:rgba(91,142,245,0.1);border:1px solid rgba(91,142,245,0.2);
+      border-radius:100px;padding:2px 10px;font-size:0.7rem;color:var(--accent);
+      display:flex;align-items:center;gap:4px;
+    }
+    .col-chip::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--ok)}
+
+    /* Workspace */
     .workspace{flex:1;display:flex;overflow:hidden;min-height:0}
-    .sidebar{width:280px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-    .sidebar-header{padding:16px;border-bottom:1px solid var(--border);flex-shrink:0}
-    .sidebar-title{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
-    .search-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s}
-    .search-input:focus{border-color:var(--accent)}
-    .search-input::placeholder{color:var(--muted)}
-    .user-list{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(79,142,247,0.2) transparent}
+
+    /* Sidebar */
+    .sidebar{
+      width:260px;flex-shrink:0;
+      background:var(--surface);border-right:1px solid var(--border);
+      display:flex;flex-direction:column;overflow:hidden;
+    }
+    .sb-head{padding:14px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .sb-title{
+      font-size:0.68rem;font-weight:600;letter-spacing:0.1em;
+      text-transform:uppercase;color:var(--muted);margin-bottom:10px;
+    }
+    .sb-search{
+      width:100%;background:var(--surface2);border:1.5px solid var(--border);
+      border-radius:10px;padding:7px 11px;
+      font-size:0.82rem;color:var(--txt);font-family:'Inter',sans-serif;outline:none;
+      transition:border-color .2s;
+    }
+    .sb-search:focus{border-color:var(--accent)}
+    .sb-search::placeholder{color:var(--muted)}
+
+    .user-list{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(91,142,245,0.15) transparent}
     .user-list::-webkit-scrollbar{width:3px}
-    .user-list::-webkit-scrollbar-thumb{background:rgba(79,142,247,0.2);border-radius:2px}
-    .user-item{padding:14px 16px;border-bottom:1px solid rgba(79,142,247,0.07);cursor:pointer;transition:background 0.15s;position:relative}
-    .user-item:hover{background:rgba(79,142,247,0.05)}
-    .user-item.active{background:rgba(79,142,247,0.1);border-left:2px solid var(--accent);padding-left:14px}
-    .user-item-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-    .user-email{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
-    .user-time{font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0}
-    .user-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .unread-dot{position:absolute;right:14px;bottom:14px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent)}
-    .empty-list{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
-    .empty-list-text{font-size:13px;color:var(--muted);line-height:1.6}
+    .user-list::-webkit-scrollbar-thumb{background:rgba(91,142,245,0.15);border-radius:2px}
+
+    .u-item{
+      padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.04);
+      cursor:pointer;transition:background .15s;position:relative;
+    }
+    .u-item:hover{background:rgba(91,142,245,0.05)}
+    .u-item.active{background:rgba(91,142,245,0.1);border-left:2px solid var(--accent);padding-left:12px}
+    .u-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+    .u-email{font-size:0.82rem;font-weight:500;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:165px}
+    .u-time{font-size:0.68rem;color:var(--muted);flex-shrink:0}
+    .u-preview{font-size:0.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .u-unread{
+      position:absolute;right:12px;bottom:12px;
+      width:8px;height:8px;border-radius:50%;
+      background:var(--accent);box-shadow:0 0 6px var(--accent);
+    }
+    .empty-sb{
+      flex:1;display:flex;align-items:center;justify-content:center;
+      padding:2rem;text-align:center;
+    }
+    .empty-sb p{font-size:0.8rem;color:var(--muted);line-height:1.6}
+
+    /* Chat area */
     .chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
-    .chat-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--surface)}
-    .chat-user-avatar{width:36px;height:36px;border-radius:50%;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;color:var(--accent);flex-shrink:0}
-    .chat-user-email{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:var(--text)}
-    .chat-user-meta{font-size:11px;color:var(--muted);margin-top:2px}
-    .chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:rgba(79,142,247,0.2) transparent}
-    .chat-messages::-webkit-scrollbar{width:4px}
-    .chat-messages::-webkit-scrollbar-thumb{background:rgba(79,142,247,0.2);border-radius:2px}
-    .msg-row{display:flex;flex-direction:column;max-width:70%}
+
+    /* Chat header */
+    .chat-head{
+      flex-shrink:0;padding:12px 18px;
+      background:var(--surface);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:12px;
+    }
+    .chat-av{
+      width:36px;height:36px;border-radius:50%;
+      background:var(--surface3);border:1px solid var(--border2);
+      display:flex;align-items:center;justify-content:center;
+      font-size:0.9rem;font-weight:700;color:var(--accent);flex-shrink:0;
+    }
+    .chat-head-info{}
+    .chat-head-email{font-size:0.9rem;font-weight:600}
+    .chat-head-meta{font-size:0.7rem;color:var(--muted);margin-top:2px}
+
+    /* Messages */
+    .chat-msgs{
+      flex:1;overflow-y:auto;
+      padding:1.2rem 1.2rem;
+      display:flex;flex-direction:column;gap:8px;
+      scrollbar-width:thin;scrollbar-color:rgba(91,142,245,0.15) transparent;
+    }
+    .chat-msgs::-webkit-scrollbar{width:4px}
+    .chat-msgs::-webkit-scrollbar-thumb{background:rgba(91,142,245,0.15);border-radius:2px}
+
+    .msg-row{display:flex;flex-direction:column;max-width:72%}
     .msg-row.from-user{align-self:flex-start;align-items:flex-start}
     .msg-row.from-admin{align-self:flex-end;align-items:flex-end}
-    .msg-meta{font-size:10px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:6px}
-    .admin-name-tag{background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.2);border-radius:4px;padding:1px 6px;font-size:10px;color:var(--accent2);font-weight:500}
-    .msg-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.55;word-break:break-word}
-    .msg-row.from-user .msg-bubble{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px}
-    .msg-row.from-admin .msg-bubble{background:linear-gradient(135deg,rgba(79,142,247,0.2),rgba(167,139,250,0.2));border:1px solid rgba(79,142,247,0.25);color:var(--text);border-bottom-right-radius:4px}
-    .reply-area{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-end;flex-shrink:0;background:var(--surface)}
-    .reply-textarea{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;outline:none;resize:none;min-height:42px;max-height:120px;line-height:1.5;transition:border-color 0.2s}
-    .reply-textarea:focus{border-color:var(--accent)}
-    .reply-textarea::placeholder{color:var(--muted)}
-    .reply-send-btn{height:42px;padding:0 20px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;border:none;border-radius:10px;cursor:pointer;white-space:nowrap;transition:opacity 0.2s;box-shadow:0 0 16px var(--glow);flex-shrink:0}
-    .reply-send-btn:hover{opacity:0.9}
-    .reply-send-btn:disabled{opacity:0.4;cursor:not-allowed}
-    .chat-placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px;text-align:center}
-    .chat-placeholder svg{width:56px;height:56px;stroke:var(--border2);fill:none}
-    .chat-placeholder-title{font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--muted)}
-    .chat-placeholder-desc{font-size:13px;color:rgba(107,114,128,0.6);max-width:260px;line-height:1.5}
-    #toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-    .toast{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,0.5);display:flex;align-items:center;gap:10px;animation:toast-in 0.3s ease forwards;max-width:320px}
-    .toast.new-user{border-color:rgba(79,142,247,0.4)}
-    @keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-    @keyframes toast-out{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(20px)}}
+
+    .msg-meta{
+      font-size:0.68rem;color:var(--muted);
+      margin-bottom:3px;display:flex;align-items:center;gap:5px;
+    }
+    .admin-tag{
+      background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.2);
+      border-radius:4px;padding:1px 6px;font-size:0.68rem;color:var(--accent2);font-weight:500;
+    }
+
+    .msg-bubble{
+      padding:9px 13px;border-radius:16px;
+      font-size:0.85rem;line-height:1.55;word-break:break-word;
+    }
+    .msg-row.from-user .msg-bubble{
+      background:var(--user-bubble);
+      border:1px solid var(--border);color:var(--txt);
+      border-bottom-left-radius:4px;
+    }
+    .msg-row.from-admin .msg-bubble{
+      background:var(--admin-bubble);
+      border:1px solid rgba(91,142,245,0.2);color:var(--txt);
+      border-bottom-right-radius:4px;
+    }
+    .msg-time{font-size:0.65rem;color:var(--muted);margin-top:3px}
+
+    /* Reply */
+    .reply-area{
+      flex-shrink:0;padding:12px 16px;
+      padding-bottom:calc(12px + var(--safe-bottom));
+      background:var(--surface);border-top:1px solid var(--border);
+      display:flex;gap:8px;align-items:flex-end;
+    }
+    .reply-inp{
+      flex:1;background:var(--surface2);border:1.5px solid var(--border);
+      border-radius:18px;padding:9px 14px;
+      font-size:0.85rem;color:var(--txt);font-family:'Inter',sans-serif;
+      outline:none;resize:none;min-height:40px;max-height:110px;
+      line-height:1.5;transition:border-color .2s;
+    }
+    .reply-inp:focus{border-color:rgba(91,142,245,0.4)}
+    .reply-inp::placeholder{color:var(--muted)}
+    .reply-send{
+      height:40px;padding:0 18px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff;font-family:'Inter',sans-serif;font-size:0.82rem;font-weight:600;
+      border:none;border-radius:12px;cursor:pointer;
+      white-space:nowrap;transition:opacity .2s;
+      box-shadow:0 2px 12px rgba(91,142,245,0.3);flex-shrink:0;
+    }
+    .reply-send:hover{opacity:.9}
+    .reply-send:disabled{opacity:.35;cursor:not-allowed}
+
+    /* Placeholder */
+    .chat-placeholder{
+      flex:1;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:10px;text-align:center;padding:2rem;
+    }
+    .chat-placeholder svg{width:52px;height:52px;stroke:var(--border2);fill:none;stroke-width:1.2}
+    .ph-title{font-size:1rem;font-weight:600;color:var(--muted)}
+    .ph-desc{font-size:0.78rem;color:rgba(107,114,128,0.6);max-width:220px;line-height:1.5}
+
+    /* Toasts */
+    #toasts{
+      position:fixed;top:14px;right:14px;z-index:9999;
+      display:flex;flex-direction:column;gap:6px;
+    }
+    .t-item{
+      background:var(--surface);border:1px solid var(--border2);
+      border-radius:12px;padding:10px 14px;
+      font-size:0.8rem;color:var(--txt);
+      box-shadow:0 6px 20px rgba(0,0,0,0.5);
+      display:flex;align-items:center;gap:8px;
+      animation:tin .3s ease forwards;max-width:300px;
+    }
+    @keyframes tin{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+    @keyframes tout{from{opacity:1}to{opacity:0;transform:translateX(16px)}}
+
+    /* Mobile responsive */
+    @media(max-width:600px){
+      .sidebar{width:100%;position:fixed;inset:0;z-index:50;transform:translateX(-100%);transition:transform .3s}
+      .sidebar.mob-open{transform:translateX(0)}
+      .chat-area{width:100%}
+      .mob-back{display:flex!important}
+    }
+    .mob-back{
+      display:none;background:none;border:none;cursor:pointer;
+      color:var(--accent);font-size:0.82rem;font-family:'Inter',sans-serif;
+      padding:0;align-items:center;gap:4px;
+    }
   </style>
 </head>
 <body>
 
-<div id="login-screen">
+<!-- LOGIN -->
+<div id="login">
   <div class="login-card">
     <div class="login-logo">KiriPilot</div>
-    <div class="login-subtitle">Панель поддержки</div>
+    <div class="login-sub">Панель поддержки</div>
     <div class="login-field">
-      <label class="login-label" for="login-name">Ваше имя</label>
-      <input id="login-name" class="login-input" type="text" placeholder="Например: Алексей" autocomplete="off"/>
+      <label class="login-label">Ваше имя</label>
+      <input id="l-name" class="login-inp" type="text" placeholder="Например: Алексей" autocomplete="off"/>
     </div>
     <div class="login-field">
-      <label class="login-label" for="login-token">Токен доступа</label>
-      <input id="login-token" class="login-input" type="password" placeholder="••••••••••••" autocomplete="current-password"/>
+      <label class="login-label">Токен доступа</label>
+      <input id="l-token" class="login-inp" type="password" placeholder="••••••••••••"/>
     </div>
-    <button id="login-btn" class="login-btn">Войти в панель</button>
-    <div id="login-error" class="login-error"></div>
+    <button id="l-btn" class="login-btn">Войти в панель</button>
+    <div id="l-err" class="login-err"></div>
   </div>
 </div>
 
-<div id="toast-container"></div>
+<!-- TOASTS -->
+<div id="toasts"></div>
 
-<div id="admin-panel">
+<!-- PANEL -->
+<div id="panel">
   <div class="topbar">
-    <span class="topbar-logo">KiriPilot</span>
-    <div class="topbar-sep"></div>
-    <span class="topbar-label">Поддержка</span>
-    <div class="topbar-spacer"></div>
-    <div class="colleagues" id="colleagues-list"></div>
-    <div class="my-badge" id="my-badge-label">…</div>
+    <span class="tb-logo">KiriPilot</span>
+    <div class="tb-sep"></div>
+    <span class="tb-label">Поддержка</span>
+    <div class="tb-space"></div>
+    <div class="colleagues" id="colleagues"></div>
+    <div class="tb-badge" id="my-name">…</div>
   </div>
+
   <div class="workspace">
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-title">Активные чаты <span id="chat-count" style="color:var(--accent)"></span></div>
-        <input class="search-input" type="search" id="search-input" placeholder="Поиск по email…"/>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sb-head">
+        <div class="sb-title">Чаты <span id="chat-count" style="color:var(--accent)"></span></div>
+        <input class="sb-search" id="sb-search" type="search" placeholder="Поиск по email…"/>
       </div>
       <div class="user-list" id="user-list">
-        <div class="empty-list">
-          <div class="empty-list-text">Ожидаем первых обращений…<br/>Пользователи появятся здесь после авторизации в чате.</div>
-        </div>
+        <div class="empty-sb"><p>Ожидаем первых обращений…<br/>Пользователи появятся здесь после авторизации.</p></div>
       </div>
     </div>
-    <div class="chat-area" id="chat-area">
-      <div class="chat-placeholder" id="chat-placeholder">
+
+    <!-- Chat -->
+    <div class="chat-area">
+      <!-- Placeholder -->
+      <div class="chat-placeholder" id="chat-ph">
         <svg viewBox="0 0 24 24" stroke-width="1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <div class="chat-placeholder-title">Выберите диалог</div>
-        <div class="chat-placeholder-desc">Нажмите на пользователя слева, чтобы открыть переписку</div>
+        <div class="ph-title">Выберите диалог</div>
+        <div class="ph-desc">Нажмите на пользователя слева, чтобы открыть переписку</div>
       </div>
-      <div id="active-chat" style="display:none;flex-direction:column;flex:1;overflow:hidden;min-height:0;">
-        <div class="chat-header" id="chat-header">
-          <div class="chat-user-avatar" id="chat-avatar">?</div>
-          <div>
-            <div class="chat-user-email" id="chat-email">—</div>
-            <div class="chat-user-meta" id="chat-meta">—</div>
+
+      <!-- Active chat -->
+      <div id="active-chat" style="display:none;flex-direction:column;flex:1;overflow:hidden;min-height:0">
+        <div class="chat-head">
+          <button class="mob-back" id="mob-back" onclick="closeMobChat()">← Назад</button>
+          <div class="chat-av" id="chat-av">?</div>
+          <div class="chat-head-info">
+            <div class="chat-head-email" id="chat-email">—</div>
+            <div class="chat-head-meta" id="chat-meta">—</div>
           </div>
         </div>
-        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-msgs" id="chat-msgs"></div>
         <div class="reply-area">
-          <textarea class="reply-textarea" id="reply-input" placeholder="Ответить пользователю…" rows="1"></textarea>
-          <button class="reply-send-btn" id="reply-send-btn">Отправить</button>
+          <textarea class="reply-inp" id="reply-inp" placeholder="Ответить…" rows="1"></textarea>
+          <button class="reply-send" id="reply-btn">Отправить</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ИСПРАВЛЕНО: подключаемся к продакшн серверу -->
 <script src="https://kiripilot.onrender.com/socket.io/socket.io.js"></script>
-
 <script>
 'use strict';
 
-const BACKEND_URL = 'https://kiripilot.onrender.com';
+const BACKEND = 'https://kiripilot.onrender.com';
+const socket  = io(BACKEND, { transports: ['websocket'] });
 
-const admin = {
-  name: '',
-  selectedSession: null,
-  sessions: new Map(),
-};
+// Heartbeat
+let _ping;
+socket.on('connect', () => {
+  if (_ping) clearInterval(_ping);
+  _ping = setInterval(() => { if (socket.connected) socket.emit('ping'); }, 25000);
+});
+socket.on('pong', () => {});
 
-const loginScreen  = document.getElementById('login-screen');
-const adminPanel   = document.getElementById('admin-panel');
-const loginName    = document.getElementById('login-name');
-const loginToken   = document.getElementById('login-token');
-const loginBtn     = document.getElementById('login-btn');
-const loginError   = document.getElementById('login-error');
-const myBadge      = document.getElementById('my-badge-label');
-const colleaguesList = document.getElementById('colleagues-list');
-const chatCount    = document.getElementById('chat-count');
-const searchInput  = document.getElementById('search-input');
-const userList     = document.getElementById('user-list');
-const chatPlaceholder = document.getElementById('chat-placeholder');
-const activeChat   = document.getElementById('active-chat');
-const chatAvatar   = document.getElementById('chat-avatar');
-const chatEmail    = document.getElementById('chat-email');
-const chatMeta     = document.getElementById('chat-meta');
-const chatMessages = document.getElementById('chat-messages');
-const replyInput   = document.getElementById('reply-input');
-const replySendBtn = document.getElementById('reply-send-btn');
-const toastContainer = document.getElementById('toast-container');
+const adm = { name: '', sel: null, sessions: new Map() };
 
-const socket = io(BACKEND_URL, { transports: ['websocket'] });
+// ── DOM shortcuts ──
+const $ = id => document.getElementById(id);
 
+// ── Login ──
 function doLogin() {
-  const name  = loginName.value.trim();
-  const token = loginToken.value.trim();
-  if (!name)  { loginError.textContent = 'Введите ваше имя'; return; }
-  if (!token) { loginError.textContent = 'Введите токен';    return; }
-  loginError.textContent = '';
-  loginBtn.disabled = true;
-  loginBtn.textContent = 'Входим…';
+  const name  = $('l-name').value.trim();
+  const token = $('l-token').value.trim();
+  if (!name)  { $('l-err').textContent = 'Введите имя';   return; }
+  if (!token) { $('l-err').textContent = 'Введите токен'; return; }
+  $('l-err').textContent = '';
+  $('l-btn').disabled = true;
+  $('l-btn').textContent = 'Входим…';
   socket.emit('admin:login', { token, name });
 }
-
-loginBtn.addEventListener('click', doLogin);
-loginToken.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+$('l-btn').addEventListener('click', doLogin);
+$('l-token').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
 socket.on('admin:auth-success', ({ name, sessions }) => {
-  admin.name = name;
-  myBadge.textContent = name;
-  loginScreen.style.display = 'none';
-  adminPanel.style.display  = 'flex';
-  adminPanel.style.flexDirection = 'column';
+  adm.name = name;
+  $('my-name').textContent = name;
+  $('login').style.display = 'none';
+  $('panel').classList.add('on');
   sessions.forEach(s => {
-    admin.sessions.set(s.sessionId, {
+    adm.sessions.set(s.sessionId, {
       email:    s.email,
       messages: [],
       unread:   s.messageCount > 0 ? 1 : 0,
@@ -223,156 +394,189 @@ socket.on('admin:auth-success', ({ name, sessions }) => {
       lastTime: s.lastMessage?.timestamp || s.createdAt,
     });
   });
-  renderUserList();
+  renderList();
 });
 
 socket.on('admin:auth-error', ({ message }) => {
-  loginError.textContent = message;
-  loginBtn.disabled = false;
-  loginBtn.textContent = 'Войти в панель';
+  $('l-err').textContent = message;
+  $('l-btn').disabled = false;
+  $('l-btn').textContent = 'Войти в панель';
 });
 
-const colleagues = new Set();
-
+// ── Colleagues ──
+const cols = new Set();
 socket.on('admin:colleague-joined', ({ name }) => {
-  colleagues.add(name);
-  renderColleagues();
-  showToast(`👋 ${name} подключился к панели`, 'info');
+  cols.add(name); renderCols();
+  showToast(`👋 ${name} подключился`);
 });
-
 socket.on('admin:colleague-left', ({ name }) => {
-  colleagues.delete(name);
-  renderColleagues();
+  cols.delete(name); renderCols();
 });
-
-function renderColleagues() {
-  colleaguesList.innerHTML = [...colleagues].map(n =>
-    `<div class="colleague-chip">${escapeHtml(n)}</div>`
+function renderCols() {
+  $('colleagues').innerHTML = [...cols].map(n =>
+    `<div class="col-chip">${esc(n)}</div>`
   ).join('');
 }
 
+// ── New user ──
 socket.on('admin:user-online', ({ sessionId, email, messageCount }) => {
-  if (!admin.sessions.has(sessionId)) {
-    admin.sessions.set(sessionId, { email, messages: [], unread: messageCount, lastMsg: '', lastTime: Date.now() });
-    renderUserList();
-    showToast(`💬 Новый пользователь: ${email}`, 'new-user');
+  if (!adm.sessions.has(sessionId)) {
+    adm.sessions.set(sessionId, { email, messages: [], unread: messageCount, lastMsg: '', lastTime: Date.now() });
+    renderList();
+    showToast(`💬 ${email}`);
   } else {
-    const s = admin.sessions.get(sessionId);
-    s.email = email;
-    renderUserList();
+    adm.sessions.get(sessionId).email = email;
+    renderList();
   }
 });
 
-socket.on('admin:message', (msg) => {
-  const s = admin.sessions.get(msg.sessionId);
+// ── Incoming message ──
+socket.on('admin:message', msg => {
+  const s = adm.sessions.get(msg.sessionId);
   if (!s) return;
   s.messages.push(msg);
   s.lastMsg  = msg.text;
   s.lastTime = msg.timestamp;
-  if (msg.from === 'user' && admin.selectedSession !== msg.sessionId) {
+  if (msg.from === 'user' && adm.sel !== msg.sessionId) {
     s.unread = (s.unread || 0) + 1;
-    showToast(`💬 ${s.email}: ${msg.text.substring(0, 60)}`, 'new-user');
+    showToast(`💬 ${s.email}: ${msg.text.substring(0, 50)}`);
   }
-  if (admin.selectedSession === msg.sessionId) appendAdminMessage(msg);
-  renderUserList();
+  if (adm.sel === msg.sessionId) appendMsg(msg);
+  renderList();
 });
 
+// ── History ──
 socket.on('admin:history', ({ sessionId, email, messages }) => {
-  const s = admin.sessions.get(sessionId);
+  const s = adm.sessions.get(sessionId);
   if (s) { s.messages = messages; s.email = email; }
-  else admin.sessions.set(sessionId, { email, messages, unread: 0, lastMsg: '', lastTime: Date.now() });
-  if (admin.selectedSession === sessionId) renderChatMessages(sessionId);
+  else adm.sessions.set(sessionId, { email, messages, unread: 0, lastMsg: '', lastTime: Date.now() });
+  if (adm.sel === sessionId) renderMsgs(sessionId);
 });
 
-function renderUserList(filter = '') {
-  chatCount.textContent = `(${admin.sessions.size})`;
-  if (admin.sessions.size === 0) {
-    userList.innerHTML = `<div class="empty-list"><div class="empty-list-text">Ожидаем первых обращений…</div></div>`;
+// ── Render list ──
+function renderList(filter = '') {
+  $('chat-count').textContent = `(${adm.sessions.size})`;
+  if (!adm.sessions.size) {
+    $('user-list').innerHTML = '<div class="empty-sb"><p>Ожидаем первых обращений…</p></div>';
     return;
   }
-  const items = [...admin.sessions.entries()]
+  const items = [...adm.sessions.entries()]
     .filter(([, s]) => !filter || s.email.includes(filter))
     .sort((a, b) => (b[1].lastTime || 0) - (a[1].lastTime || 0));
-  userList.innerHTML = items.map(([sessionId, s]) => `
-    <div class="user-item ${admin.selectedSession === sessionId ? 'active' : ''}"
-         data-session="${escapeHtml(sessionId)}"
-         onclick="openChat('${escapeHtml(sessionId)}')">
-      <div class="user-item-header">
-        <div class="user-email" title="${escapeHtml(s.email)}">${escapeHtml(s.email)}</div>
-        <div class="user-time">${s.lastTime ? formatTime(s.lastTime) : ''}</div>
+
+  $('user-list').innerHTML = items.map(([sid, s]) => `
+    <div class="u-item ${adm.sel === sid ? 'active' : ''}" onclick="openChat('${esc(sid)}')">
+      <div class="u-row">
+        <div class="u-email" title="${esc(s.email)}">${esc(s.email)}</div>
+        <div class="u-time">${s.lastTime ? fmtTime(s.lastTime) : ''}</div>
       </div>
-      <div class="user-preview">${s.lastMsg ? escapeHtml(s.lastMsg.substring(0, 55)) : 'Нет сообщений'}</div>
-      ${s.unread ? '<div class="unread-dot"></div>' : ''}
+      <div class="u-preview">${s.lastMsg ? esc(s.lastMsg.slice(0, 50)) : 'Нет сообщений'}</div>
+      ${s.unread ? '<div class="u-unread"></div>' : ''}
     </div>
   `).join('');
 }
+$('sb-search').addEventListener('input', e => renderList(e.target.value.toLowerCase().trim()));
 
-searchInput.addEventListener('input', (e) => renderUserList(e.target.value.toLowerCase().trim()));
-
-function openChat(sessionId) {
-  admin.selectedSession = sessionId;
-  const s = admin.sessions.get(sessionId);
+// ── Open chat ──
+function openChat(sid) {
+  adm.sel = sid;
+  const s = adm.sessions.get(sid);
   if (!s) return;
   s.unread = 0;
-  renderUserList(searchInput.value.toLowerCase().trim());
-  chatPlaceholder.style.display = 'none';
-  activeChat.style.display      = 'flex';
-  chatAvatar.textContent        = s.email[0].toUpperCase();
-  chatEmail.textContent         = s.email;
-  chatMeta.textContent          = `Сессия активна • ${s.messages.length} сообщ.`;
-  if (s.messages.length > 0) renderChatMessages(sessionId);
-  else { chatMessages.innerHTML = ''; socket.emit('admin:get-history', { sessionId }); }
-  replyInput.focus();
+  renderList($('sb-search').value.toLowerCase().trim());
+
+  $('chat-ph').style.display  = 'none';
+  const ac = $('active-chat');
+  ac.style.display = 'flex';
+
+  $('chat-av').textContent    = s.email[0].toUpperCase();
+  $('chat-email').textContent = s.email;
+  $('chat-meta').textContent  = `${s.messages.length} сообщений`;
+
+  if (s.messages.length) renderMsgs(sid);
+  else { $('chat-msgs').innerHTML = ''; socket.emit('admin:get-history', { sessionId: sid }); }
+
+  $('reply-inp').focus();
+
+  // Mobile: show chat
+  if (window.innerWidth <= 600) {
+    $('sidebar').classList.remove('mob-open');
+  }
 }
 
-function renderChatMessages(sessionId) {
-  const s = admin.sessions.get(sessionId);
+function closeMobChat() {
+  $('sidebar').classList.add('mob-open');
+}
+
+// ── Render messages ──
+function renderMsgs(sid) {
+  const s = adm.sessions.get(sid);
   if (!s) return;
-  chatMessages.innerHTML = '';
-  s.messages.forEach(msg => appendAdminMessage(msg, false));
-  scrollChatToBottom();
+  $('chat-msgs').innerHTML = '';
+  s.messages.forEach(m => appendMsg(m, false));
+  scrollBot();
+  $('chat-meta').textContent = `${s.messages.length} сообщений`;
 }
 
-function appendAdminMessage(msg, scroll = true) {
-  const isAdminMsg = msg.from === 'admin';
+function appendMsg(msg, scroll = true) {
+  const isAdm = msg.from === 'admin';
   const row = document.createElement('div');
-  row.className = `msg-row ${isAdminMsg ? 'from-admin' : 'from-user'}`;
-  const metaHtml = isAdminMsg
-    ? `<span class="admin-name-tag">${escapeHtml(msg.adminName || 'Неизвестно')}</span> <span>${formatTime(msg.timestamp)}</span>`
-    : `<span>Пользователь</span> <span>${formatTime(msg.timestamp)}</span>`;
-  row.innerHTML = `<div class="msg-meta">${metaHtml}</div><div class="msg-bubble">${escapeHtml(msg.text)}</div>`;
-  chatMessages.appendChild(row);
-  if (scroll) scrollChatToBottom();
-  const s = admin.sessions.get(admin.selectedSession);
-  if (s) chatMeta.textContent = `Сессия активна • ${s.messages.length} сообщ.`;
+  row.className = 'msg-row ' + (isAdm ? 'from-admin' : 'from-user');
+  const meta = isAdm
+    ? `<span class="admin-tag">${esc(msg.adminName || 'Оператор')}</span><span>${fmtTime(msg.timestamp)}</span>`
+    : `<span>Пользователь</span><span>${fmtTime(msg.timestamp)}</span>`;
+  row.innerHTML = `
+    <div class="msg-meta">${meta}</div>
+    <div class="msg-bubble">${esc(msg.text)}</div>
+  `;
+  $('chat-msgs').appendChild(row);
+  if (scroll) scrollBot();
+  const s = adm.sessions.get(adm.sel);
+  if (s) $('chat-meta').textContent = `${s.messages.length} сообщений`;
 }
 
-function scrollChatToBottom() { chatMessages.scrollTop = chatMessages.scrollHeight; }
+function scrollBot() {
+  const m = $('chat-msgs');
+  m.scrollTop = m.scrollHeight;
+}
 
+// ── Reply ──
 function sendReply() {
-  const text = replyInput.value.trim();
-  if (!text || !admin.selectedSession) return;
-  socket.emit('admin:reply', { sessionId: admin.selectedSession, text });
-  replyInput.value = '';
-  replyInput.style.height = 'auto';
+  const text = $('reply-inp').value.trim();
+  if (!text || !adm.sel) return;
+  socket.emit('admin:reply', { sessionId: adm.sel, text });
+  $('reply-inp').value = '';
+  $('reply-inp').style.height = 'auto';
+}
+$('reply-btn').addEventListener('click', sendReply);
+$('reply-inp').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(); }
+});
+$('reply-inp').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 110) + 'px';
+});
+
+// ── Toasts ──
+function showToast(text) {
+  const t = document.createElement('div');
+  t.className = 't-item';
+  t.textContent = text;
+  $('toasts').appendChild(t);
+  setTimeout(() => {
+    t.style.animation = 'tout .3s ease forwards';
+    setTimeout(() => t.remove(), 300);
+  }, 4000);
 }
 
-replySendBtn.addEventListener('click', sendReply);
-replyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(); } });
-replyInput.addEventListener('input', () => { replyInput.style.height = 'auto'; replyInput.style.height = replyInput.scrollHeight + 'px'; });
-
-function showToast(text, type = '') {
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.innerHTML = `<span>${escapeHtml(text)}</span>`;
-  toastContainer.appendChild(toast);
-  setTimeout(() => { toast.style.animation = 'toast-out 0.3s ease forwards'; setTimeout(() => toast.remove(), 300); }, 4000);
+// ── Utils ──
+function fmtTime(ts) {
+  return new Date(ts).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 }
-
-function formatTime(ts) { return new Date(ts).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }); }
-
-function escapeHtml(str = '') {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\n/g,'<br/>');
+function esc(s = '') {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\n/g,'<br/>');
 }
 </script>
 </body>
