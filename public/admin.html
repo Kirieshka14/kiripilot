@@ -259,8 +259,8 @@
 
     /* Mobile responsive */
     @media(max-width:600px){
-      .sidebar{width:100%;position:fixed;inset:0;z-index:50;transform:translateX(-100%);transition:transform .3s}
-      .sidebar.mob-open{transform:translateX(0)}
+      .sidebar{width:100%;position:fixed;inset:0;z-index:50;transform:translateX(0);transition:transform .3s}
+      .sidebar.mob-closed{transform:translateX(-100%)}
       .chat-area{width:100%}
       .mob-back{display:flex!important}
     }
@@ -346,12 +346,11 @@
   </div>
 </div>
 
-<script src="https://kiripilot.onrender.com/socket.io/socket.io.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 <script>
 'use strict';
 
-const BACKEND = 'https://kiripilot.onrender.com';
-const socket  = io(BACKEND, { transports: ['websocket'] });
+const socket = io(window.location.origin, { transports: ['websocket', 'polling'] });
 
 // Heartbeat
 let _ping;
@@ -385,6 +384,13 @@ socket.on('admin:auth-success', ({ name, sessions }) => {
   $('my-name').textContent = name;
   $('login').style.display = 'none';
   $('panel').classList.add('on');
+
+  // На мобильном по умолчанию должен быть виден список чатов,
+  // а не пустой плейсхолдер "Выберите диалог".
+  if (window.innerWidth <= 600) {
+    $('sidebar').classList.remove('mob-closed');
+  }
+
   sessions.forEach(s => {
     adm.sessions.set(s.sessionId, {
       email:    s.email,
@@ -498,14 +504,14 @@ function openChat(sid) {
 
   $('reply-inp').focus();
 
-  // Mobile: show chat
+  // Mobile: скрываем список, показываем чат
   if (window.innerWidth <= 600) {
-    $('sidebar').classList.remove('mob-open');
+    $('sidebar').classList.add('mob-closed');
   }
 }
 
 function closeMobChat() {
-  $('sidebar').classList.add('mob-open');
+  $('sidebar').classList.remove('mob-closed');
 }
 
 // ── Render messages ──
