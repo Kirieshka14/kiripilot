@@ -344,9 +344,66 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
   #cb{bottom:16px;right:16px}
 }
 @media(prefers-reduced-motion:reduce){.sp1,.sp2{animation:none}}
+
+/* ══ INTRO (Midjourney-style: scrambled prompt feed + hollow logo cut-out) ══ */
+#introOv{
+  position:fixed;inset:0;z-index:99999;background:var(--bg);
+  overflow:hidden;transition:opacity .7s ease;
+}
+#introOv.out{opacity:0;pointer-events:none}
+#introTxt{
+  position:absolute;inset:0;margin:0;padding:14px;
+  font-family:'Space Grotesk',monospace;font-size:12px;line-height:21px;
+  color:rgba(91,156,246,.36);white-space:pre-wrap;word-break:break-all;
+  user-select:none;letter-spacing:.02em;
+}
+#introOv::after{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.24) 0px,rgba(0,0,0,.24) 1px,transparent 1px,transparent 3px);
+  mix-blend-mode:multiply;
+}
+#introGlow{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:64vmin;height:64vmin;border-radius:50%;z-index:1;
+  background:radial-gradient(circle,rgba(91,156,246,.2),transparent 70%);
+}
+#introLogo{
+  position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.9rem;
+  pointer-events:none;
+}
+#introWord{
+  display:flex;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;
+  font-size:clamp(2.3rem,9.5vw,4.4rem);letter-spacing:-.01em;
+}
+#introWord span{
+  display:inline-block;opacity:0;transform:translateY(10px) scale(.92);
+  color:transparent;-webkit-text-stroke:1.6px var(--a);
+  filter:drop-shadow(0 0 16px rgba(91,156,246,.65));
+  transition:opacity .5s ease,transform .5s ease;
+}
+#introWord span.on{opacity:1;transform:none}
+#introTag{
+  font-size:.72rem;color:rgba(236,238,248,.55);letter-spacing:.22em;text-transform:uppercase;
+  opacity:0;transition:opacity .6s ease;
+}
+#introTag.on{opacity:1}
+@media(max-width:640px){#introTxt{font-size:10px;line-height:17px}}
+@media(prefers-reduced-motion:reduce){#introOv{transition:none}#introLogo span,#introTag{transition:none}}
   </style>
 </head>
 <body>
+
+<div id="introOv">
+  <pre id="introTxt"></pre>
+  <div id="introGlow"></div>
+  <div id="introLogo">
+    <div id="introWord">
+      <span>K</span><span>i</span><span>r</span><span>i</span><span>P</span><span>i</span><span>l</span><span>o</span><span>t</span>
+    </div>
+    <div id="introTag">Navigate your potential</div>
+  </div>
+</div>
 
 <canvas id="cv"></canvas>
 
@@ -619,6 +676,56 @@ section{padding:6rem 2rem 5rem;display:flex;flex-direction:column;align-items:ce
 <script src="/socket.io/socket.io.js"></script>
 <script>
 'use strict';
+
+/* ══ INTRO: scrambled prompt feed → KiriPilot cut-out reveal (Midjourney-style) ══ */
+(()=>{
+  const KEY='kiri_intro_shown';
+  const ov=document.getElementById('introOv');
+  if(!ov)return;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(sessionStorage.getItem(KEY)||reduced){ov.remove();return}
+  sessionStorage.setItem(KEY,'1');
+
+  const htmlEl=document.documentElement;
+  const prevOverflow=htmlEl.style.overflow;
+  htmlEl.style.overflow='hidden';
+
+  const txtEl=document.getElementById('introTxt');
+  const words=['imagine','style','portrait','light','color','dream','render','pixel','form','noise','vision','flow','spark','drift','echo','glow','frame','trace','shift','bloom','texture','surreal','gradient','aperture','cinematic','canvas','sunrise','cyberpunk','watercolor','octane'];
+  const chars='abcdefghijklmnopqrstuvwxyz';
+  const scramble=len=>{let s='';for(let i=0;i<len;i++)s+=chars[Math.random()*chars.length|0];return s};
+  const genLine=()=>{
+    const n=4+(Math.random()*4|0);
+    const parts=[];
+    for(let i=0;i<n;i++)parts.push(Math.random()<.32?words[Math.random()*words.length|0]:scramble(2+(Math.random()*7|0)));
+    return '/'+parts.join(' ');
+  };
+  const fill=()=>{
+    const rows=Math.ceil(innerHeight/21)+2;
+    let out='';
+    for(let i=0;i<rows;i++)out+=genLine()+'\n';
+    txtEl.textContent=out;
+  };
+  fill();
+  // непрерывный "декодинг" фона, пока держится заставка
+  const flick=setInterval(fill,150);
+
+  // буквы проступают как вырез в шуме, с задержкой между собой
+  document.querySelectorAll('#introWord span').forEach((sp,i)=>{
+    setTimeout(()=>sp.classList.add('on'),500+i*110);
+  });
+  setTimeout(()=>document.getElementById('introTag').classList.add('on'),1650);
+
+  const HOLD_UNTIL=3200; // логотип держится на экране, чтобы его успели увидеть
+  setTimeout(()=>{
+    clearInterval(flick);
+    ov.classList.add('out');
+    setTimeout(()=>{
+      ov.remove();
+      htmlEl.style.overflow=prevOverflow;
+    },700);
+  },HOLD_UNTIL);
+})();
 
 (()=>{
   const c=document.getElementById('cv'),x=c.getContext('2d');
